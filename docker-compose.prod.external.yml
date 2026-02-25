@@ -1,0 +1,119 @@
+services:
+  remnatgseller-db:
+    image: postgres:17
+    container_name: "remnatgseller-db"
+    hostname: remnatgseller-db
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - TZ=UTC
+    
+    volumes:
+      - remnatgseller-db-data:/var/lib/postgresql/data
+
+    networks:
+      - remnawave-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 10s
+      retries: 3
+    
+
+  remnatgseller-redis:
+    image: valkey/valkey:9-alpine
+    container_name: "remnatgseller-redis"
+    hostname: remnatgseller-redis
+    restart: unless-stopped
+
+    command: [ "--requirepass", "${REDIS_PASSWORD}" ]
+
+    volumes:
+      - remnatgseller-redis-data:/data
+
+    networks:
+      - remnawave-network
+
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 3s
+      timeout: 10s
+      retries: 3
+    
+
+  remnatgseller:
+    &remnatgseller
+    image: ghcr.io/gvarch1r/remnatgseller:latest
+    container_name: "remnatgseller"
+    hostname: remnatgseller
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    environment:
+      RESET_ASSETS: "${RESET_ASSETS:-false}"
+
+    depends_on:
+        remnatgseller-db:
+          condition: service_healthy
+        remnatgseller-redis:
+          condition: service_healthy
+
+    volumes:
+      - ./logs:/opt/remnatgseller/logs
+      - ./assets:/opt/remnatgseller/assets
+
+    networks:
+      - remnawave-network
+    
+
+  remnatgseller-taskiq-worker:
+    <<: *remnatgseller
+    container_name: "remnatgseller-taskiq-worker"
+    hostname: remnatgseller-taskiq-worker
+    command: taskiq worker src.infrastructure.taskiq.worker:worker 
+      --tasks-pattern src/infrastructure/taskiq/tasks -fsd
+
+    depends_on:
+        remnatgseller-redis:
+          condition: service_healthy
+        remnatgseller-db:
+          condition: service_healthy
+
+
+  remnatgseller-taskiq-scheduler:
+    <<: *remnatgseller
+    container_name: "remnatgseller-taskiq-scheduler"
+    hostname: remnatgseller-taskiq-scheduler
+    command: taskiq scheduler src.infrastructure.taskiq.scheduler:scheduler
+      --tasks-pattern src/infrastructure/taskiq/tasks -fsd
+
+    depends_on:
+        remnatgseller-redis:
+          condition: service_healthy
+        remnatgseller-db:
+          condition: service_healthy
+
+
+networks:
+  remnawave-network:
+    name: remnawave-network 
+    driver: bridge 
+    external: false
+
+volumes:
+  remnatgseller-db-data:
+    name: remnatgseller-db-data
+    driver: local
+    external: false
+    
+  remnatgseller-redis-data:
+    name: remnatgseller-redis-data
+    driver: local
+    external: false
