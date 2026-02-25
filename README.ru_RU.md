@@ -5,12 +5,10 @@
     <u><b>РУССКИЙ</b></u>
 </p>
 
-![remnatgseller](https://github.com/user-attachments/assets/57ba5832-4646-45e1-b082-f8f2f5e82c3e)
+# RemnatgSeller
 
-**Этот проект представляет собой Telegram-бота для продажи VPN-подписок, интегрированного с Remnawave.**
+**Telegram-бот для продажи VPN-подписок, интегрированный с Remnawave.**
 
-[![Static Badge](https://img.shields.io/badge/public_group-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsn0ups)](https://t.me/remna_shop)
-[![Static Badge](https://img.shields.io/badge/remnawave-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsnoups)](https://t.me/+xQs17zMzwCY1NzYy)
 ![GitHub Repo stars](https://img.shields.io/github/stars/gvarch1r/remnatgseller)
 </div>
 
@@ -319,15 +317,3 @@ cd /opt/remnatgseller && docker compose pull && docker compose down && RESET_ASS
 > [!IMPORTANT]
 > На данный момент обновления переводов при апдейте бота не сохраняются.  
 > При обновлении ваши предыдущие ассеты будут архивированы в: `/opt/remnatgseller/assets/*.bak`
-
-
-# 💸 Поддержка проекта
-
-Любая поддержка поможет мне уделять больше времени разработке и ускорить развитие проекта!
-
-> Российские и международные карты - [**Tribute**](https://t.me/tribute/app?startapp=drsi)
-
-> СБП, ЮMoney, SberPay, T-Pay - [**ЮKassa**](https://yookassa.ru/my/i/Z8AkHJ_F9sO_/l)
-
-> USDT TRC-20 - **`TPnpmwD4P9znKs3Hp4Hrh9rhJ7u1m6UA1B`**
-

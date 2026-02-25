@@ -5,12 +5,10 @@
     <a href="https://github.com/gvarch1r/remnatgseller/blob/main/README.ru_RU.md"><b>РУССКИЙ</b></a>
 </p>
 
-![remnatgseller](https://github.com/user-attachments/assets/57ba5832-4646-45e1-b082-f8f2f5e82c3e)
+# RemnatgSeller
 
-**This project is a Telegram bot for selling VPN subscriptions, integrated with Remnawave.**
+**Telegram bot for selling VPN subscriptions, integrated with Remnawave.**
 
-[![Static Badge](https://img.shields.io/badge/public_group-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsn0ups)](https://t.me/remna_shop)
-[![Static Badge](https://img.shields.io/badge/remnawave-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsnoups)](https://t.me/+xQs17zMzwCY1NzYy)
 ![GitHub Repo stars](https://img.shields.io/github/stars/gvarch1r/remnatgseller)
 </div>
 
@@ -322,15 +320,3 @@ After making changes, you need to restart the container for the updates to take 
 > [!IMPORTANT]
 > Currently, translation persistence during bot updates is not supported.  
 > When updating, your previous assets will be archived in: `/opt/remnatgseller/assets/*.bak`
-
-
-# 💸 Project Support
-
-Any support helps me dedicate more time to development and accelerate project progress!
-
-> Russian and international cards - [**Tribute**](https://t.me/tribute/app?startapp=drsi)
-
-> SBP, ЮMoney, SberPay, T-Pay - [**ЮKassa**](https://yookassa.ru/my/i/Z8AkHJ_F9sO_/l)
-
-> USDT TRC-20 - **`TPnpmwD4P9znKs3Hp4Hrh9rhJ7u1m6UA1B`**
-
