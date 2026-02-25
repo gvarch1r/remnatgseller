@@ -9,314 +9,102 @@
 
 **Telegram bot for selling VPN subscriptions, integrated with Remnawave.**
 
+[![Static Badge](https://img.shields.io/badge/Telegram-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fremna_shop)](https://t.me/remna_shop)
+[![Static Badge](https://img.shields.io/badge/Remnawave-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fremnawave)](https://t.me/+xQs17zMzwCY1NzYy)
 ![GitHub Repo stars](https://img.shields.io/github/stars/gvarch1r/remnatgseller)
 </div>
 
-# ✨ Features
+---
 
-- **📦 Plans**
-    > Unique architecture that allows flexible plan creation and precise availability control.
-    
-    > Supports any limits — by traffic, devices, both, or unlimited.
+RemnatgSeller is a self-hosted Telegram bot that automates VPN subscription sales. It works with the Remnawave panel and provides a full admin dashboard right inside Telegram.
 
-    > Control plan availability for specific user types or individual users.
+## What's included
 
-    > Link internal and external squads to specific plans.
+| Module | Description |
+|--------|-------------|
+| **Plans** | Create plans with traffic/device limits, multi-currency pricing, squad binding, availability rules |
+| **Promocodes** | Rewards: extra days, traffic, discounts, free plans. Lifetime by time or activations |
+| **Broadcasts** | Mass messages by audience (plan, subscription status). Media + HTML support |
+| **Referrals** | Two-level system, rewards in points or days, configurable accrual rules |
+| **Payments** | Telegram Stars, YooKassa, Cryptomus, Heleket, CryptoPay, RoboKassa and more |
+| **Trial** | Free trial plans with configurable limits and availability |
+| **Access control** | 5 modes: full lock, open, invite-only, purchase/register restricted |
+| **Statistics** | Users, transactions, subscriptions, plans, promocodes, referrals |
+| **User editor** | Full profile, subscription management, roles, blocking, sync with panel |
 
-    > Support for any subscription duration.
+Additional: device management, ad links, discount system, i18n, banners, MiniApp support.
 
-    > Ability to make any duration free of charge.
+---
 
-    > Multi-currency pricing for each duration.
+## Installation
 
-    > Customizable plan display order.
-
-    > Built-in plan configurator directly in the bot interface.
-
-- **🎟️ Promocodes**
-    > Multiple reward types: extra days, traffic, subscription activation for a chosen plan, personal discount, or discount for the next purchase.
-
-    > Configurable lifetime: by time or number of activations.
-
-    > Convenient promocode configurator.
-
-- **📢 Broadcasts**
-    > View all previously sent messages with content preview.
-
-    > Send by user category: all users, by plan, with subscription, without subscription, expired, or trial.
-
-    > Supports photos, videos, GIFs, and stickers.
-
-    > Supports HTML tags for message formatting.
-
-    > Preview messages before sending.
-
-    > Option to stop an active broadcast.
-
-    > Option to delete sent messages.
-
-- **🔔 Notifications**
-    > Configurable notification system directly in the bot interface.
-
-    > User notifications: subscription expiring, expired, traffic exhausted.
-
-    > System notifications: bot lifecycle, bot update, new user registration, subscription activation, promocode activation, get trial, node status, first user connection, device add/remove events.
-
-- **🧪 Trial**
-    > Configurable trial setup through the plan configurator.
-
-    > Supports any limits.
-
-    > Supports multiple trial plans.
-
-    > Separate internal and external squad assignments.
-
-    > Availability settings for users who joined via referral or ad links.
-
-- **👥 Referral System**
-    > Detailed referral statistics.
-
-    > Referral system configurator.
-    
-    > Reward customization: points or extra days.
-
-    > Two-level referral support.
-
-- **💳 Flexible Payment System**
-    > Supports multiple payment gateways: Telegram Stars, YooKassa, YooMoney, Cryptomus, Heleket, CryptoPay, RoboKassa.
-
-    > Payment gateway configurator.
-
-    > Default currency setup.
-
-    > Ability to run test payments for selected gateways.
-
-    > Customizable display order for payment methods.
-
-- **📱 Device Management**
-    > Allows users to manage their connected devices (only with active subscriptions and within device limits).
-
-    > Configurable cooldown for device reset actions.
-
-- **🏷️ Discount System**
-    > Two discount types: personal and next purchase.
-
-    > Discounts do not stack — the largest discount is applied.
-
-    > Discount display on purchase buttons.
-
-- **🔐 Access Mode**
-    > Five access modes: full restriction, open for all, invite-only, purchase restricted, and register restricted.
-
-    > Automatic notifications for users who attempted to purchase during restricted mode.
-
-    > Conditional access support: rule acceptance and channel subscription.
-
-- **📈 Ad Links**
-    > Create links to track traffic sources and user acquisition.
-
-    > Built-in link configurator.
-
-    > View detailed analytics for each link.
-
-- **📊 Statistics**
-    > Detailed analytics by category: users, transactions, subscriptions, plans, promocodes, referrals.
-
-- **👤 User Editor**
-    > Complete user information: profile data, stats, subscription, transactions.
-
-    > Edit personal discounts.
-
-    > Manage roles: developer, admin, user.
-
-    > Block users.
-
-    > Grant plan access for purchase.
-
-    > Full subscription editor: modify limits, reset traffic, manage devices, squads, expiration date, toggle subscription status, delete, or get connection link.
-
-    > View all banned users.
-
-    > Search by name, username and id.
-
-    > View recent registrations and active users.
-
-    > Quick access via forwarded messages, system notifications, or main menu search.
-
-- **🔄 User Synchronization**
-    > Automatic synchronization with the panel.
-
-    > Edit user data both from the bot and the panel.
-
-- **🔍 User Audit**
-    > View full user activity history.
-    
-- **🌐 Internationalization**
-    > Ability to set unique banners for each locale.
-
-    > Support for interface translations into multiple languages.
-
-    > Automatic language detection on the user's first launch and after subsequent changes.
-
-- **🧭 Migration**
-    > Seamless migration from other bots.
-  
-- **🪄 MiniApp Subscription Page Support**
-
-
-# ⚙️ Installation and configuration
-
-## Requirements
-- Hardware:
-    - OS: Recommended Ubuntu or Debian
-    - RAM: Minimum 2 GB, recommended 4 GB
-    - CPU: Minimum 2 cores, recommended 4 cores
-    - Storage: 20 GB, minimum and recommended
-
-- Software:
-    - [Docker](https://docs.docker.com/get-started/get-docker/)
-
-    Install Docker using official script
-    ```
-    sudo curl -fsSL https://get.docker.com | sh
-    ```
+**Requirements:** Ubuntu/Debian, 2+ GB RAM, 4+ GB recommended, [Docker](https://docs.docker.com/get-started/get-docker/)
 
 > [!WARNING]
-> **The latest version of the bot is compatible with RemnaWave panel version 2.3.x–2.6.x**  
-> For panel 2.6.x, use the updated remnapy dependency (see [Remnawave 2.6.x compatibility](#remnawave-26x-compatibility) below).
+> **Remnawave 2.3.x–2.6.x** supported. For 2.6.x, use the bundled `remnapy-production` (see `pyproject.toml`).
 
-### Remnawave 2.6.x compatibility
+### 1. Clone and setup
 
-For Remnawave panel **2.6.x**, this repository includes an updated `remnapy-production` folder with API changes (customRemarks: `emptyInternalSquads` removed, `HWIDNotSupported` and `HWIDMaxDevicesExceeded` added). The remnapy path dependency is configured by default in `pyproject.toml`.
-
-## Step 1 – Download required files
-
-Create the project directory
-```
+```bash
 mkdir /opt/remnatgseller && cd /opt/remnatgseller
 ```
 
-Download `docker-compose.yml` compose-file and `.env` by running these commands:
+Download configs:
 
-- Get `docker-compose.yml` file:
+- **External panel** (bot on separate server):
+  ```bash
+  curl -o docker-compose.yml https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/docker-compose.prod.external.yml
+  ```
+- **Internal panel** (same server):
+  ```bash
+  curl -o docker-compose.yml https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/docker-compose.prod.internal.yml
+  ```
 
-    - For external panel **(the bot is hosted on a separate server from the panel)**:
-    ```
-    curl -o docker-compose.yml https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/docker-compose.prod.external.yml
-    ```
-    - For internal panel **(the bot and panel are hosted on the same server)**:
-    ```
-    curl -o docker-compose.yml https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/docker-compose.prod.internal.yml
-    ```
-
-- Get `.env` file
-    ```
-    curl -o .env https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/.env.example
-    ```
-
-
-## Step 2 – Configure the .env file
-
-Generate secret keys by running the following commands:
-
-- Generate secure keys
+```bash
+curl -o .env https://raw.githubusercontent.com/gvarch1r/remnatgseller/refs/heads/main/.env.example
 ```
+
+### 2. Configure .env
+
+Generate secrets:
+
+```bash
 sed -i "s|^APP_CRYPT_KEY=.*|APP_CRYPT_KEY=$(openssl rand -base64 32 | tr -d '\n')|" .env && sed -i "s|^BOT_SECRET_TOKEN=.*|BOT_SECRET_TOKEN=$(openssl rand -hex 64 | tr -d '\n')|" .env
-```
-
-- Generate passwords
-```
 sed -i "s|^DATABASE_PASSWORD=.*|DATABASE_PASSWORD=$(openssl rand -hex 24 | tr -d '\n')|" .env && sed -i "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=$(openssl rand -hex 24 | tr -d '\n')|" .env
 ```
 
-Now, open the .env file and update the variables:
-
-- **`APP_DOMAIN`** : The domain used by Telegram and Remnawave to reach your bot.
-- **`BOT_TOKEN`** : Your bot token from BotFather.
-- **`BOT_DEV_ID`** : Telegram ID of the main developer.
-- **`BOT_SUPPORT_USERNAME`** : Support username without the `@` symbol.
-- **`REMNAWAVE_HOST`** : The domain or Docker container name.
-- **`REMNAWAVE_TOKEN`** : Remnawave API token, created in the panel.
-- **`REMNAWAVE_WEBHOOK_SECRET`** : Must match the value of `WEBHOOK_SECRET_HEADER` from `.env` the panel.
-
-> [!WARNING]
-> Depending on your configuration, also pay attention to the following variables: **`BOT_MINI_APP`**, **`REMNAWAVE_CADDY_TOKEN`**, **`REMNAWAVE_COOKIE`**.
+Edit `.env` and set: `APP_DOMAIN`, `BOT_TOKEN`, `BOT_DEV_ID`, `BOT_SUPPORT_USERNAME`, `REMNAWAVE_HOST`, `REMNAWAVE_TOKEN`, `REMNAWAVE_WEBHOOK_SECRET`.
 
 > [!IMPORTANT]
-> The bot requires a properly configured webhook to function.  
-> In the Remnawave Panel `.env` file, set:
-> 
+> Configure webhook in Remnawave panel `.env`:
 > ```
 > WEBHOOK_ENABLED=true
-> WEBHOOK_URL=https://bot.domain.com/api/v1/remnawave
+> WEBHOOK_URL=https://your-bot-domain.com/api/v1/remnawave
 > ```
-> Replace `bot.domain.com` with your actual domain.  
-> This step is critically important for the bot to receive events correctly.
 
+### 3. Run
 
-## Step 3 – Start the containers
-
-Start the containers by running the following command:
-
-```
+```bash
 docker compose up -d && docker compose logs -f -t
 ```
 
-After a few seconds, you should see the bot successfully start.
+### 4. Reverse proxy
 
+Forward `https://your-domain/api/v1` → `http://remnatgseller:5000`
+See [Remnawave reverse proxy docs](https://docs.rw/docs/install/reverse-proxies/) for examples.
 
-## Step 4 - Reverse proxies
+### 5. Upgrade
 
-A reverse proxy is required to run RemnatgSeller properly.  
-It is needed to receive webhooks from Telegram, the Remnawave panel, and payment systems.
-
-**This guide does not cover how to install or configure a reverse proxy.**  
-You can use any proxy solution, similar to how it is done for [**Remnawave**](https://docs.rw/docs/install/reverse-proxies/).
-
-> If you are installing the bot on the same server as the panel, you probably already have a proxy configured.  
-> In this case, you only need to add a forwarding rule to route traffic to the bot container.
-
-**Configure the following path to forward requests to the bot container:**
-
-`https://your-domain/api/v1` -> `http://remnatgseller:5000`
-
-
-## Step 5 – How to upgrade
-
-To update and restart the bot, run the following command:
-```
+```bash
 cd /opt/remnatgseller && docker compose pull && docker compose down && RESET_ASSETS=true docker compose up -d && docker compose logs -f
 ```
 
-When using `RESET_ASSETS=true`, the following actions are performed:
-  - All current assets are backed up with a timestamp (`/opt/remnatgseller/assets/*.bak`).
-  - New assets from the image are downloaded and unpacked.
-  - After the update, the bot will use the latest files.
+`RESET_ASSETS=true` backs up old assets to `*.bak` and applies new ones.
 
-> [!CAUTION]
-> If you do not use `RESET_ASSETS=true`, the old assets will remain unchanged.  
-> This may cause the bot to work incorrectly after the update.
+---
 
+## Customization
 
-# 🖼️ Banners
+**Banners:** `/opt/remnatgseller/assets/banners/(locale)/` — formats: jpg, png, gif, webp. Keep `default.jpg`.
 
-The bot supports custom banners for each page category and locale: `menu`, `dashboard`, `subscription`, `promocode`, `referral`. 
-
-To set a custom banner, name it according to the target page and ensure it uses one of the supported formats: `jpg`, `jpeg`, `png`, `gif`, `webp`.
-
-Banners should be placed in: `/opt/remnatgseller/assets/banners/(locale)/`  
-Example: `/opt/remnatgseller/assets/banners/en/menu.gif`
-
-> [!IMPORTANT]
-> Do not delete the `default.jpg` file — it is required for proper operation.
-
-
-# 🌐 Translations
-You can edit any translation file located in:
-`/opt/remnatgseller/assets/translations/(locale)/`
-
-After making changes, you need to restart the container for the updates to take effect.
-
-> [!IMPORTANT]
-> Currently, translation persistence during bot updates is not supported.  
-> When updating, your previous assets will be archived in: `/opt/remnatgseller/assets/*.bak`
+**Translations:** `/opt/remnatgseller/assets/translations/(locale)/` — edit and restart container.
