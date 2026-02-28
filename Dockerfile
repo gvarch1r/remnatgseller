@@ -5,7 +5,7 @@ WORKDIR /opt/remnatgseller
 COPY pyproject.toml uv.lock ./
 COPY remnapy-production ./remnapy-production
 
-RUN uv sync --locked --no-dev --no-cache --compile-bytecode \
+RUN uv sync --no-dev --no-cache --compile-bytecode \
     && find .venv -type d -name "__pycache__" -exec rm -rf {} + \
     && rm -rf .venv/lib/python3.12/site-packages/pip* \
     && rm -rf .venv/lib/python3.12/site-packages/setuptools* \
