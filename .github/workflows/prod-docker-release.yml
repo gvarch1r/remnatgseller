@@ -1,9 +1,9 @@
 name: Remnatgseller - Release
 
 on:
-  release:
-    types: [published]
-
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -14,10 +14,10 @@ jobs:
       packages: write
 
     steps:
-      - name: 🧾 Checkout main branch
+      - name: 🧾 Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔄 Update uv.lock
@@ -80,10 +80,9 @@ jobs:
             BUILD_TAG=${{ steps.vars.outputs.ref_name }}
 
       - name: 📦 Create GitHub Release
-        if: github.event_name == 'release'
+        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GH_PAT }}
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           generate_release_notes: false
