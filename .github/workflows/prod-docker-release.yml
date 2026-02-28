@@ -20,6 +20,13 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔍 Debug uv sync
+        run: |
+          docker run --rm -v "$PWD:/app" -w /app \
+            -e SETUPTOOLS_SCM_PRETEND_VERSION=2.3.3 \
+            ghcr.io/astral-sh/uv:python3.12-alpine \
+            sh -c "uv sync --no-dev --no-cache -v 2>&1" || true
+
       - name: 🔖 Get latest tag
         id: latest-tag
         uses: JinoArch/get-latest-tag@latest
@@ -55,11 +62,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: 🏗️ Build and Push Docker Image
+        env:
+          BUILDKIT_PROGRESS: plain
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          provenance: false
           tags: |
             ghcr.io/gvarch1r/remnatgseller:latest
             ghcr.io/gvarch1r/remnatgseller:${{ steps.vars.outputs.ref_name }}
