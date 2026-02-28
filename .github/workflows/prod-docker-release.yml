@@ -20,12 +20,12 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔍 Debug uv sync
+      - name: 🔄 Update uv.lock
         run: |
           docker run --rm -v "$PWD:/app" -w /app \
             -e SETUPTOOLS_SCM_PRETEND_VERSION=2.3.3 \
             ghcr.io/astral-sh/uv:python3.12-alpine \
-            sh -c "uv sync --no-dev --no-cache -v 2>&1" || true
+            uv lock
 
       - name: 🔖 Get latest tag
         id: latest-tag
