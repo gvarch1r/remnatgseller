@@ -5,7 +5,10 @@ WORKDIR /opt/remnatgseller
 COPY pyproject.toml uv.lock ./
 COPY remnapy-production ./remnapy-production
 
-RUN uv sync --no-dev --no-cache --compile-bytecode \
+# remnapy-production uses setuptools_scm (needs git) — set version for Docker build
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=2.3.3
+
+RUN uv sync --locked --no-dev --no-cache --compile-bytecode \
     && find .venv -type d -name "__pycache__" -exec rm -rf {} + \
     && rm -rf .venv/lib/python3.12/site-packages/pip* \
     && rm -rf .venv/lib/python3.12/site-packages/setuptools* \
