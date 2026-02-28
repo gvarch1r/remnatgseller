@@ -41,7 +41,7 @@ Additional: device management, ad links, discount system, i18n, banners, MiniApp
 **Requirements:** Ubuntu/Debian, 2+ GB RAM, 4+ GB recommended, [Docker](https://docs.docker.com/get-started/get-docker/)
 
 > [!WARNING]
-> **Remnawave 2.3.x–2.6.x** supported. For 2.6.x, use the bundled `remnapy-production` (see `pyproject.toml`).
+> **Remnawave 2.3.x–2.6.4** supported. For 2.6.x, use the bundled `remnapy-production` (see `pyproject.toml`).
 
 ### 1. Clone and setup
 

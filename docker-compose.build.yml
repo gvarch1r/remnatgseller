@@ -1,0 +1,28 @@
+# Use this when ghcr.io image is unavailable. Build locally:
+# 1. Clone repo: git clone https://github.com/gvarch1r/remnatgseller.git /opt/remnatgseller-src
+# 2. cd /opt/remnatgseller-src
+# 3. cp docker-compose.prod.internal.yml ../remnatgseller/docker-compose.yml
+# 4. cp .env.example ../remnatgseller/.env
+# 5. cd ../remnatgseller
+# 6. docker compose -f docker-compose.yml -f ../remnatgseller-src/docker-compose.build.yml up -d --build
+#
+# Or from repo root: docker compose -f docker-compose.prod.internal.yml -f docker-compose.build.yml up -d --build
+
+services:
+  remnatgseller:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: remnatgseller:local
+
+  remnatgseller-taskiq-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: remnatgseller:local
+
+  remnatgseller-taskiq-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: remnatgseller:local
