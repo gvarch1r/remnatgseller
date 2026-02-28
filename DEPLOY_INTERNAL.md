@@ -1,11 +1,11 @@
-# Развёртывание Remnashop на сервере с панелью (internal)
+# Развёртывание RemnatgSeller на сервере с панелью (internal)
 
 Бот и панель Remnawave на одном сервере.
 
 ## 1. Подготовка на сервере
 
 ```bash
-mkdir -p /opt/remnashop && cd /opt/remnashop
+mkdir -p /opt/remnatgseller && cd /opt/remnatgseller
 ```
 
 ## 2. Файлы
@@ -14,10 +14,10 @@ mkdir -p /opt/remnashop && cd /opt/remnashop
 
 ```bash
 # docker-compose для internal (бот и панель на одном сервере)
-curl -o docker-compose.yml https://raw.githubusercontent.com/YOUR_REPO/main/docker-compose.prod.internal.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/gvarch1r/remnatgseller/main/docker-compose.prod.internal.yml
 
 # Пример .env
-curl -o .env https://raw.githubusercontent.com/YOUR_REPO/main/.env.example
+curl -o .env https://raw.githubusercontent.com/gvarch1r/remnatgseller/main/.env.example
 ```
 
 Или скопировать из локального репозитория:
@@ -26,8 +26,8 @@ curl -o .env https://raw.githubusercontent.com/YOUR_REPO/main/.env.example
 
 **Локальная сборка:** если деплоите свой форк, измените в docker-compose `image:` на свой образ или соберите локально:
 ```bash
-docker build -t remnashop:local .
-# и в docker-compose: image: remnashop:local
+docker build -t remnatgseller:local .
+# и в docker-compose: image: remnatgseller:local
 ```
 
 ## 3. Настройка .env
@@ -78,10 +78,25 @@ WEBHOOK_URL=https://ваш-домен/api/v1/remnawave
 https://ваш-домен/api/v1 -> http://remnatgseller:5000
 ```
 
+**Nginx:** при установке с панелью Remnawave конфиг обычно в `/opt/remnawave/nginx/` или в папке панели. Добавьте `server`/`location` для домена бота, например:
+
+```nginx
+location /api/v1 {
+    proxy_pass http://remnatgseller:5000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Бот должен быть в той же Docker-сети, что и Nginx/панель.
+
 ## 7. Запуск
 
 ```bash
-cd /opt/remnashop
+cd /opt/remnatgseller
 docker compose up -d
 docker compose logs -f
 ```
@@ -89,7 +104,7 @@ docker compose logs -f
 ## 8. Обновление
 
 ```bash
-cd /opt/remnashop
+cd /opt/remnatgseller
 docker compose pull
 docker compose down
 docker compose up -d
