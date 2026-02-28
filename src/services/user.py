@@ -35,7 +35,7 @@ from .base import BaseService
 
 class UserService(BaseService):
     uow: UnitOfWork
-    remnawave: RemnawaveSDK | None
+    remnawave: RemnawaveSDK
 
     def __init__(
         self,
@@ -46,7 +46,7 @@ class UserService(BaseService):
         translator_hub: TranslatorHub,
         #
         uow: UnitOfWork,
-        remnawave: RemnawaveSDK | None = None,
+        remnawave: RemnawaveSDK,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
@@ -338,7 +338,7 @@ class UserService(BaseService):
                     logger.warning(f"Failed to parse RemnatgSeller ID from query '{search_query}'")
 
             else:
-                if self.remnawave and search_query.replace("_", "").replace("-", "").isalnum():
+                if search_query.replace("_", "").replace("-", "").isalnum():
                     try:
                         remna_user = await self.remnawave.users.get_user_by_username(
                             search_query
