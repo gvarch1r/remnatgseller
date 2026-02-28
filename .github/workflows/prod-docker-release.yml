@@ -23,6 +23,7 @@ jobs:
       - name: 🔖 Get latest tag
         id: latest-tag
         uses: JinoArch/get-latest-tag@latest
+        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
 
       - name: 🏷️ Define Build Args
         id: vars
@@ -30,11 +31,17 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           IMAGE_REPO="ghcr.io/${GITHUB_REPOSITORY}"
-          IMAGE_TAGS="${IMAGE_REPO}:latest,${IMAGE_REPO}:${GITHUB_REF_NAME}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            REF_NAME="main-${SHORT_SHA}"
+          else
+            REF_NAME="${{ github.ref_name }}"
+          fi
+          IMAGE_TAGS="${IMAGE_REPO}:latest,${IMAGE_REPO}:${REF_NAME}"
 
           echo "image_tag=${IMAGE_TAGS}" >> $GITHUB_OUTPUT
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "build_time=${BUILD_TIME}" >> $GITHUB_OUTPUT
+          echo "ref_name=${REF_NAME}" >> $GITHUB_OUTPUT
           echo "✅ Tags: ${IMAGE_TAGS}"
           echo "✅ SHA: ${SHORT_SHA}"
 
@@ -55,14 +62,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/gvarch1r/remnatgseller:latest
-            ghcr.io/gvarch1r/remnatgseller:${{ github.ref_name }}
+            ghcr.io/gvarch1r/remnatgseller:${{ steps.vars.outputs.ref_name }}
           build-args: |
             BUILD_TIME=${{ steps.vars.outputs.build_time }}
             BUILD_BRANCH=main
             BUILD_COMMIT=${{ steps.vars.outputs.short_sha }}
-            BUILD_TAG=${{ github.ref_name }}
+            BUILD_TAG=${{ steps.vars.outputs.ref_name }}
 
       - name: 📦 Create GitHub Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
