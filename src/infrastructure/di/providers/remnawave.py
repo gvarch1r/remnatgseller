@@ -10,6 +10,11 @@ class RemnawaveProvider(Provider):
     scope = Scope.APP
 
     @provide
+    def get_remnawave_optional(self, remnawave: RemnawaveSDK) -> RemnawaveSDK | None:
+        """Provide RemnawaveSDK | None for services that accept optional SDK."""
+        return remnawave
+
+    @provide
     def get_remnawave(self, config: AppConfig) -> RemnawaveSDK:
         logger.debug("Initializing RemnawaveSDK")
 
