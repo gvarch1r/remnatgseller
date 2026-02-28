@@ -20,7 +20,7 @@ dependencies = [
     "pydantic-settings~=2.11.0",
     "redis~=7.0.0",
     # remnapy with Remnawave 2.6.x support (use remnapy-production/ for panel 2.6.x)
-    "remnapy = { path = \"remnapy-production\", develop = true }",
+    "remnapy",
     "taskiq[orjson]~=0.12.1",
     "taskiq-redis~=1.2.0",
     "uvicorn>=0.38.0",
@@ -28,6 +28,9 @@ dependencies = [
     "sqlalchemy[mypy]>=2.0.0",
     "qrcode[pil]>=8.2",
 ]
+
+[tool.uv.sources]
+remnapy = { path = "remnapy-production" }
 
 [project.urls]
 homepage = "https://github.com/gvarch1r/remnatgseller"
