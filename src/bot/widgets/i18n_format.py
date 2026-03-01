@@ -64,7 +64,15 @@ class I18nFormat(Text):
             key = self.key.format_map(data)
             return i18n_postprocess_text(text=i18n.get(key, **data))
         except KeyNotFoundError:
-            fallback = hub.get_translator_by_locale(locale=config.default_locale)
-            data = get_translated_kwargs(fallback, data)
-            key = self.key.format_map(data)
-            return i18n_postprocess_text(text=fallback.get(key, **data))
+            try:
+                fallback = hub.get_translator_by_locale(locale=config.default_locale)
+                data = get_translated_kwargs(fallback, data)
+                key = self.key.format_map(data)
+                return i18n_postprocess_text(text=fallback.get(key, **data))
+            except KeyNotFoundError:
+                logger.warning(
+                    "i18n key '{key}' not found in user locale or default locale {default}",
+                    key=self.key,
+                    default=config.default_locale,
+                )
+                return i18n_postprocess_text(text=f"[{self.key}]")

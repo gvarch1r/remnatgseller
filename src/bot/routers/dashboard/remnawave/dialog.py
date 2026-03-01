@@ -1,5 +1,6 @@
 from aiogram_dialog import Dialog, StartMode, Window
 from aiogram_dialog.widgets.kbd import NumberedPager, Row, Start, StubScroll, SwitchTo
+from aiogram_dialog.widgets.text import Format
 
 from src.bot.keyboards import main_menu_button
 from src.bot.states import Dashboard, DashboardRemnawave
@@ -16,7 +17,7 @@ from .getters import (
 
 remnawave = Window(
     Banner(BannerName.DASHBOARD),
-    I18nFormat("msg-remnawave-main"),
+    Format("{main_text}"),
     Row(
         SwitchTo(
             text=I18nFormat("btn-remnawave-users"),

@@ -4,15 +4,18 @@ from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.common import ManagedScroll
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
-from fluentogram import TranslatorRunner
+from fluentogram import TranslatorHub, TranslatorRunner
+from fluentogram.exceptions import KeyNotFoundError
 from remnapy import RemnawaveSDK
 
+from src.core.config import AppConfig
 from src.core.i18n.translator import get_translated_kwargs
 from src.core.utils.formatters import (
     format_country_code,
     format_percent,
     i18n_format_bytes_to_unit,
     i18n_format_seconds,
+    i18n_postprocess_text,
 )
 
 
@@ -20,6 +23,9 @@ from src.core.utils.formatters import (
 async def system_getter(
     dialog_manager: DialogManager,
     remnawave: FromDishka[RemnawaveSDK],
+    i18n: FromDishka[TranslatorRunner],
+    hub: FromDishka[TranslatorHub],
+    config: FromDishka[AppConfig],
     **kwargs: Any,
 ) -> dict[str, Any]:
     result = await remnawave.system.get_stats()
@@ -32,7 +38,7 @@ async def system_getter(
         except Exception:
             pass
 
-    return {
+    data: dict[str, Any] = {
         "version": version,
         "cpu_cores": result.cpu.physical_cores,
         "cpu_threads": result.cpu.cores,
@@ -44,6 +50,19 @@ async def system_getter(
         ),
         "uptime": i18n_format_seconds(result.uptime),
     }
+
+    try:
+        data = get_translated_kwargs(i18n, data)
+        main_text = i18n.get("msg-remnawave-main", **data)
+    except KeyNotFoundError:
+        try:
+            fallback = hub.get_translator_by_locale(locale=config.default_locale)
+            data = get_translated_kwargs(fallback, data)
+            main_text = fallback.get("msg-remnawave-main", **data)
+        except KeyNotFoundError:
+            main_text = "🌊 RemnaWave"
+
+    return {**data, "main_text": i18n_postprocess_text(text=main_text)}
 
 
 @inject
