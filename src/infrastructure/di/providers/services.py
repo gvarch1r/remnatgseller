@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.services.access import AccessService
+from src.services.audit import AuditService
 from src.services.broadcast import BroadcastService
 from src.services.command import CommandService
 from src.services.importer import ImporterService
@@ -23,6 +24,7 @@ class ServicesProvider(Provider):
 
     command_service = provide(source=CommandService)
     access_service = provide(source=AccessService, scope=Scope.REQUEST)
+    audit_service = provide(source=AuditService, scope=Scope.REQUEST)
     notification_service = provide(source=NotificationService, scope=Scope.REQUEST)
     gateway_service = provide(source=PaymentGatewayService, scope=Scope.REQUEST)
     plan_service = provide(source=PlanService, scope=Scope.REQUEST)

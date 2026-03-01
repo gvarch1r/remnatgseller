@@ -103,3 +103,27 @@ msg-remnawave-inbounds =
     <b>🔌 Inbounds</b>
 
     { $inbound }
+
+# User
+msg-user-audit = <b>📋 User activity history</b>
+
+# User statistics
+msg-user-statistics =
+    <b>📊 User statistics</b>
+
+    <b>🧾 Transactions:</b>
+    <blockquote>
+    • Total: { $transactions_total }
+    • Completed: { $transactions_completed }
+    • Spent: { $spent_total }
+    </blockquote>
+
+    <b>💳 Subscriptions:</b>
+    <blockquote>
+    • Total issued: { $subscriptions_total }
+    </blockquote>
+
+    <b>👥 Referrals:</b>
+    <blockquote>
+    • Invited: { $referrals_count }
+    </blockquote>

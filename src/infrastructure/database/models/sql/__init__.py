@@ -1,3 +1,4 @@
+from .audit_log import AuditLog
 from .base import BaseSql
 from .broadcast import Broadcast, BroadcastMessage
 from .payment_gateway import PaymentGateway
@@ -10,6 +11,7 @@ from .transaction import Transaction
 from .user import User
 
 __all__ = [
+    "AuditLog",
     "BaseSql",
     "Broadcast",
     "BroadcastMessage",

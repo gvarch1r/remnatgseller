@@ -98,6 +98,7 @@ btn-users-unblock-all = 🔓 Разблокировать всех
 btn-user-discount = 💸 Изменить скидку
 btn-user-points = 💎 Изменить баллы
 btn-user-statistics = 📊 Статистика
+btn-user-audit = 📋 Аудит
 btn-user-message = 📩 Сообщение
 btn-user-role = 👮‍♂️ Изменить роль
 btn-user-transactions = 🧾 Транзакции

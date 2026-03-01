@@ -19,12 +19,12 @@ from magic_filter import F
 
 from src.bot.keyboards import back_main_menu_button
 from src.bot.routers.dashboard.broadcast.handlers import on_content_input, on_preview
-from src.bot.routers.extra.test import show_dev_popup
 from src.bot.states import DashboardUser, DashboardUsers
 from src.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from src.core.enums import BannerName, SubscriptionStatus, UserRole
 
 from .getters import (
+    audit_getter,
     device_limit_getter,
     devices_getter,
     discount_getter,
@@ -36,6 +36,7 @@ from .getters import (
     points_getter,
     role_getter,
     squads_getter,
+    statistics_getter,
     subscription_duration_getter,
     subscription_getter,
     sync_getter,
@@ -90,10 +91,15 @@ user = Window(
         when=F["has_subscription"],
     ),
     Row(
-        Button(
+        SwitchTo(
             text=I18nFormat("btn-user-statistics"),
             id="statistics",
-            on_click=show_dev_popup,
+            state=DashboardUser.STATISTICS,
+        ),
+        SwitchTo(
+            text=I18nFormat("btn-user-audit"),
+            id="audit",
+            state=DashboardUser.AUDIT,
         ),
         Button(
             text=I18nFormat("btn-user-transactions"),
@@ -164,6 +170,51 @@ user = Window(
     IgnoreUpdate(),
     state=DashboardUser.MAIN,
     getter=user_getter,
+)
+
+statistics = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-user-statistics"),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardUser.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=DashboardUser.STATISTICS,
+    getter=statistics_getter,
+)
+
+audit = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-user-audit"),
+    ScrollingGroup(
+        ListGroup(
+            Row(
+                Format("{item[created_at]} — {item[action]}: {item[details]}"),
+                id="audit_item",
+            ),
+            id="audit_list",
+            item_id_getter=lambda item: item["id"],
+            items="audit_logs",
+        ),
+        id="audit_scroll",
+        width=1,
+        height=10,
+        hide_on_single_page=True,
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardUser.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=DashboardUser.AUDIT,
+    getter=audit_getter,
 )
 
 subscription = Window(
@@ -722,6 +773,8 @@ role = Window(
 
 router = Dialog(
     user,
+    statistics,
+    audit,
     subscription,
     traffic_limit,
     device_limit,

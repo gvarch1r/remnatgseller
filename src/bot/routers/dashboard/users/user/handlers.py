@@ -17,7 +17,7 @@ from src.bot.keyboards import get_contact_support_keyboard
 from src.bot.states import DashboardUser
 from src.core.config import AppConfig
 from src.core.constants import USER_KEY
-from src.core.enums import SubscriptionStatus, UserRole
+from src.core.enums import AuditActionType, SubscriptionStatus, UserRole
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
 from src.core.utils.time import datetime_now
@@ -32,6 +32,7 @@ from src.infrastructure.taskiq.tasks.redirects import redirect_to_main_menu_task
 from src.services.notification import NotificationService
 from src.services.plan import PlanService
 from src.services.remnawave import RemnawaveService
+from src.services.audit import AuditService
 from src.services.subscription import SubscriptionService
 from src.services.transaction import TransactionService
 from src.services.user import UserService
@@ -54,6 +55,7 @@ async def on_block_toggle(
     widget: Button,
     dialog_manager: DialogManager,
     user_service: FromDishka[UserService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -64,6 +66,12 @@ async def on_block_toggle(
 
     blocked = not target_user.is_blocked
     await user_service.set_block(user=target_user, blocked=blocked)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.BLOCKED if blocked else AuditActionType.UNBLOCKED,
+        details="",
+        actor_telegram_id=user.telegram_id,
+    )
     await redirect_to_main_menu_task.kiq(target_user.telegram_id)
     logger.info(f"{log(user)} {'Blocked' if blocked else 'Unblocked'} {log(target_user)}")
 
@@ -75,6 +83,7 @@ async def on_role_select(
     dialog_manager: DialogManager,
     selected_role: UserRole,
     user_service: FromDishka[UserService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -84,6 +93,12 @@ async def on_role_select(
         raise ValueError(f"User '{target_telegram_id}' not found")
 
     await user_service.set_role(user=target_user, role=selected_role)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.ROLE_CHANGED,
+        details=f"role={selected_role.value}",
+        actor_telegram_id=user.telegram_id,
+    )
     await redirect_to_main_menu_task.kiq(target_user.telegram_id)
     logger.info(f"{log(user)} Changed role to '{selected_role} for {log(target_user)}")
 
@@ -150,6 +165,7 @@ async def on_subscription_delete(
     subscription_service: FromDishka[SubscriptionService],
     remnawave_service: FromDishka[RemnawaveService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -168,6 +184,12 @@ async def on_subscription_delete(
         await subscription_service.update(subscription)
         await user_service.delete_current_subscription(target_telegram_id)
         await remnawave_service.delete_user(target_user)
+        await audit_service.log(
+            user_telegram_id=target_telegram_id,
+            action_type=AuditActionType.SUBSCRIPTION_DELETED,
+            details="",
+            actor_telegram_id=user.telegram_id,
+        )
         logger.info(f"{log(user)} Deleted subscription for user '{target_telegram_id}'")
         await dialog_manager.switch_to(state=DashboardUser.MAIN)
         return
@@ -217,6 +239,7 @@ async def on_device_delete(
     sub_manager: SubManager,
     user_service: FromDishka[UserService],
     remnawave_service: FromDishka[RemnawaveService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     await sub_manager.load_data()
     selected_short_hwid = sub_manager.item_id
@@ -238,6 +261,12 @@ async def on_device_delete(
         raise ValueError(f"User '{target_telegram_id}' not found")
 
     devices = await remnawave_service.delete_device(user=target_user, hwid=full_hwid)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.DEVICE_REMOVED,
+        details=full_hwid[:64],
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(f"{log(user)} Deleted device '{full_hwid}' for user '{target_telegram_id}'")
 
     if devices:
@@ -272,6 +301,7 @@ async def on_discount_select(
     dialog_manager: DialogManager,
     selected_discount: int,
     user_service: FromDishka[UserService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected discount '{selected_discount}'")
@@ -283,6 +313,12 @@ async def on_discount_select(
 
     target_user.personal_discount = selected_discount
     await user_service.update(user=target_user)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.DISCOUNT_CHANGED,
+        details=f"discount={selected_discount}%",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(f"{log(user)} Changed discount to '{selected_discount}' for '{target_telegram_id}'")
     await dialog_manager.switch_to(state=DashboardUser.MAIN)
 
@@ -294,6 +330,7 @@ async def on_discount_input(
     dialog_manager: DialogManager,
     user_service: FromDishka[UserService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
@@ -313,6 +350,12 @@ async def on_discount_input(
     number = int(message.text)
     target_user.personal_discount = number
     await user_service.update(user=target_user)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.DISCOUNT_CHANGED,
+        details=f"discount={number}%",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(f"{log(user)} Changed discount to '{number}' for '{target_telegram_id}'")
     await dialog_manager.switch_to(state=DashboardUser.MAIN)
 
@@ -324,6 +367,7 @@ async def on_points_input(
     dialog_manager: DialogManager,
     user_service: FromDishka[UserService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
@@ -357,7 +401,12 @@ async def on_points_input(
 
     target_user.points = new_points
     await user_service.update(user=target_user)
-
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.POINTS_CHANGED,
+        details=f"{'+' if number > 0 else ''}{number}",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(
         f"{log(user)} {'Added' if number > 0 else 'Subtracted'} "
         f"'{abs(number)}' points for '{target_telegram_id}'"
@@ -374,6 +423,7 @@ async def on_points_select(
     subscription_service: FromDishka[SubscriptionService],
     notification_service: FromDishka[NotificationService],
     remnawave_service: FromDishka[RemnawaveService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected points '{selected_points}'")
@@ -397,7 +447,12 @@ async def on_points_select(
 
     target_user.points = new_points
     await user_service.update(target_user)
-
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.POINTS_CHANGED,
+        details=f"{'+' if selected_points > 0 else ''}{selected_points}",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(
         f"{log(user)} {'Added' if selected_points > 0 else 'Subtracted'} "
         f"'{abs(selected_points)}' points for '{target_telegram_id}'"
@@ -707,6 +762,7 @@ async def on_plan_select(
     dialog_manager: DialogManager,
     selected_plan_id: int,
     plan_service: FromDishka[PlanService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected plan '{selected_plan_id}'")
@@ -718,10 +774,18 @@ async def on_plan_select(
 
     if target_telegram_id not in plan.allowed_user_ids:
         plan.allowed_user_ids.append(target_telegram_id)
+        action = "added"
     else:
         plan.allowed_user_ids.remove(target_telegram_id)
+        action = "removed"
 
     await plan_service.update(plan)
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.GIVE_ACCESS,
+        details=f"plan_id={selected_plan_id} action={action}",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(
         f"{log(user)} Given access to plan '{selected_plan_id}' for user '{target_telegram_id}'"
     )
@@ -843,6 +907,7 @@ async def on_send(
     i18n: FromDishka[TranslatorRunner],
     user_service: FromDishka[UserService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -868,6 +933,12 @@ async def on_send(
         message = await notification_service.notify_user(
             user=target_user,
             payload=MessagePayload(**payload),
+        )
+        await audit_service.log(
+            user_telegram_id=target_telegram_id,
+            action_type=AuditActionType.MESSAGE_SENT,
+            details="",
+            actor_telegram_id=user.telegram_id,
         )
         await dialog_manager.switch_to(state=DashboardUser.MAIN)
 
@@ -941,6 +1012,7 @@ async def on_sync_from_remnawave(
     subscription_service: FromDishka[SubscriptionService],
     user_service: FromDishka[UserService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -965,6 +1037,12 @@ async def on_sync_from_remnawave(
     else:
         await remnawave_service.sync_user(result[0], creating=False)
 
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.SYNC_FROM_REMNAWAVE,
+        details="",
+        actor_telegram_id=user.telegram_id,
+    )
     await notification_service.notify_user(
         user=user,
         payload=MessagePayload(i18n_key="ntf-user-sync-success"),
@@ -981,6 +1059,7 @@ async def on_sync_from_remnatgseller(
     remnawave_service: FromDishka[RemnawaveService],
     user_service: FromDishka[UserService],
     notification_service: FromDishka[NotificationService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
@@ -1010,6 +1089,12 @@ async def on_sync_from_remnatgseller(
             )
             await remnawave_service.sync_user(created_user, creating=False)
 
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.SYNC_FROM_REMNATGSELLER,
+        details="",
+        actor_telegram_id=user.telegram_id,
+    )
     await notification_service.notify_user(
         user=user,
         payload=MessagePayload(i18n_key="ntf-user-sync-success"),
@@ -1068,6 +1153,7 @@ async def on_subscription_duration_select(
     plan_service: FromDishka[PlanService],
     subscription_service: FromDishka[SubscriptionService],
     remnawave_service: FromDishka[RemnawaveService],
+    audit_service: FromDishka[AuditService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected duration '{selected_duration}'")
@@ -1111,5 +1197,11 @@ async def on_subscription_duration_select(
     )
     await subscription_service.create(target_user, new_subscription)
 
+    await audit_service.log(
+        user_telegram_id=target_telegram_id,
+        action_type=AuditActionType.GIVE_SUBSCRIPTION,
+        details=f"plan_id={selected_plan_id} duration={selected_duration}d",
+        actor_telegram_id=user.telegram_id,
+    )
     logger.info(f"{log(user)} Set plan '{selected_plan_id}' for user '{target_telegram_id}'")
     await dialog_manager.switch_to(state=DashboardUser.MAIN)

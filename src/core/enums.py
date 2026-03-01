@@ -62,6 +62,28 @@ class PurchaseType(UpperStrEnum):
     CHANGE = auto()
 
 
+class AuditActionType(UpperStrEnum):
+    REGISTERED = auto()
+    SUBSCRIPTION_CREATED = auto()
+    SUBSCRIPTION_UPDATED = auto()
+    SUBSCRIPTION_DELETED = auto()
+    ROLE_CHANGED = auto()
+    BLOCKED = auto()
+    UNBLOCKED = auto()
+    DISCOUNT_CHANGED = auto()
+    POINTS_CHANGED = auto()
+    PURCHASE_COMPLETED = auto()
+    PROMOCODE_ACTIVATED = auto()
+    REFERRAL_ATTACHED = auto()
+    DEVICE_ADDED = auto()
+    DEVICE_REMOVED = auto()
+    SYNC_FROM_REMNAWAVE = auto()
+    SYNC_FROM_REMNATGSELLER = auto()
+    GIVE_SUBSCRIPTION = auto()
+    GIVE_ACCESS = auto()
+    MESSAGE_SENT = auto()
+
+
 class TransactionStatus(UpperStrEnum):
     PENDING = auto()
     COMPLETED = auto()

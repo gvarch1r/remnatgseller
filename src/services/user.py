@@ -18,13 +18,14 @@ from src.core.constants import (
     TIME_5M,
     TIME_10M,
 )
-from src.core.enums import Locale, UserRole
+from src.core.enums import AuditActionType, Locale, UserRole
 from src.core.storage.key_builder import StorageKey, build_key
 from src.core.storage.keys import RecentActivityUsersKey
 from src.core.utils.formatters import format_user_name
 from src.core.utils.generators import generate_referral_code
 from src.core.utils.types import RemnaUserDto
 from src.infrastructure.database import UnitOfWork
+from src.services.audit import AuditService
 from src.infrastructure.database.models.dto import UserDto
 from src.infrastructure.database.models.dto.user import BaseUserDto
 from src.infrastructure.database.models.sql import User
@@ -36,6 +37,7 @@ from .base import BaseService
 class UserService(BaseService):
     uow: UnitOfWork
     remnawave: RemnawaveSDK
+    audit_service: AuditService
 
     def __init__(
         self,
@@ -47,10 +49,12 @@ class UserService(BaseService):
         #
         uow: UnitOfWork,
         remnawave: RemnawaveSDK,
+        audit_service: AuditService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
         self.remnawave = remnawave
+        self.audit_service = audit_service
 
     async def create(self, aiogram_user: AiogramUser) -> UserDto:
         user = UserDto(
@@ -74,6 +78,11 @@ class UserService(BaseService):
             db_created_user = await self.uow.repository.users.create(db_user)
 
         await self.clear_user_cache(user.telegram_id)
+        await self.audit_service.log(
+            user_telegram_id=user.telegram_id,
+            action_type=AuditActionType.REGISTERED,
+            details="",
+        )
         logger.info(f"Created new user '{user.telegram_id}'")
         return UserDto.from_model(db_created_user)  # type: ignore[return-value]
 
@@ -94,6 +103,11 @@ class UserService(BaseService):
             db_created_user = await self.uow.repository.users.create(db_user)
 
         await self.clear_user_cache(user.telegram_id)
+        await self.audit_service.log(
+            user_telegram_id=user.telegram_id,
+            action_type=AuditActionType.REGISTERED,
+            details="from_panel",
+        )
         logger.info(f"Created new user '{user.telegram_id}' from panel")
         return UserDto.from_model(db_created_user)  # type: ignore[return-value]
 

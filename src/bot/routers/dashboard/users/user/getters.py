@@ -4,6 +4,7 @@ from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from fluentogram import TranslatorRunner
+from fluentogram.exceptions import KeyNotFoundError
 from remnapy import RemnawaveSDK
 from remnapy.exceptions import NotFoundError
 from remnapy.models import GetOneNodeResponseDto
@@ -22,7 +23,10 @@ from src.core.utils.formatters import (
 )
 from src.infrastructure.database.models.dto import UserDto
 from src.infrastructure.database.models.dto.subscription import RemnaSubscriptionDto
+from src.core.enums import TransactionStatus
+from src.services.audit import AuditService
 from src.services.plan import PlanService
+from src.services.referral import ReferralService
 from src.services.remnawave import RemnawaveService
 from src.services.settings import SettingsService
 from src.services.subscription import SubscriptionService
@@ -386,6 +390,76 @@ async def expire_time_getter(
         "expire_time": i18n_format_expire_time(subscription.expire_at),
         "durations": formatted_durations,
     }
+
+
+@inject
+async def statistics_getter(
+    dialog_manager: DialogManager,
+    transaction_service: FromDishka[TransactionService],
+    subscription_service: FromDishka[SubscriptionService],
+    referral_service: FromDishka[ReferralService],
+    settings_service: FromDishka[SettingsService],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
+    transactions = await transaction_service.get_by_user(target_telegram_id)
+    subscriptions = await subscription_service.get_all_by_user(target_telegram_id)
+    referral_enabled = await settings_service.is_referral_enable()
+    referral_count = await referral_service.get_referral_count(target_telegram_id) if referral_enabled else 0
+
+    completed = [t for t in transactions if t.status == TransactionStatus.COMPLETED]
+    total_spent = sum(t.pricing.final_amount for t in completed)
+    by_currency: dict[str, float] = {}
+    for t in completed:
+        sym = t.currency.symbol
+        by_currency[sym] = by_currency.get(sym, 0) + float(t.pricing.final_amount)
+
+    spent_str = ", ".join(f"{v:.2f} {k}" for k, v in sorted(by_currency.items())) if by_currency else "0"
+
+    return {
+        "transactions_total": len(transactions),
+        "transactions_completed": len(completed),
+        "spent_total": spent_str,
+        "subscriptions_total": len(subscriptions),
+        "referrals_count": referral_count,
+    }
+
+
+@inject
+async def audit_getter(
+    dialog_manager: DialogManager,
+    audit_service: FromDishka[AuditService],
+    i18n: FromDishka[TranslatorRunner],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    target_telegram_id = dialog_manager.dialog_data["target_telegram_id"]
+    logs = await audit_service.get_by_user(target_telegram_id, limit=50)
+    total = await audit_service.count_by_user(target_telegram_id)
+
+    formatted_logs = []
+    for i, log in enumerate(logs):
+        action_key = f"audit-action-{log['action_type'].lower().replace('_', '-')}"
+        try:
+            action_text = i18n.get(action_key)
+        except KeyNotFoundError:
+            action_text = log["action_type"]
+        formatted_logs.append(
+            {
+                "id": i,
+                "action": action_text,
+                "details": (log["details"] or "—")[:200],
+                "created_at": log["created_at"],
+            }
+        )
+
+    if not formatted_logs:
+        try:
+            empty_text = i18n.get("audit-empty")
+        except KeyNotFoundError:
+            empty_text = "—"
+        formatted_logs = [{"id": 0, "action": empty_text, "details": "", "created_at": ""}]
+
+    return {"audit_logs": formatted_logs, "audit_total": total}
 
 
 @inject

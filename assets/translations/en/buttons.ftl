@@ -1,5 +1,6 @@
 # Back
 btn-back = ⬅️ Back
+btn-user-audit = 📋 Audit
 
 # RemnaWave
 btn-remnawave-users = 👥 Users

@@ -331,6 +331,27 @@ msg-broadcast-view =
 # Users
 msg-users-recent-registered = <b>🆕 Последние зарегистрированные</b>
 msg-users-recent-activity = <b>📝 Последние взаимодействующие</b>
+msg-user-statistics =
+    <b>📊 Статистика пользователя</b>
+
+    <b>🧾 Транзакции:</b>
+    <blockquote>
+    • Всего: { $transactions_total }
+    • Завершённых: { $transactions_completed }
+    • Потрачено: { $spent_total }
+    </blockquote>
+
+    <b>💳 Подписки:</b>
+    <blockquote>
+    • Всего оформлено: { $subscriptions_total }
+    </blockquote>
+
+    <b>👥 Рефералы:</b>
+    <blockquote>
+    • Приглашено: { $referrals_count }
+    </blockquote>
+
+msg-user-audit = <b>📋 История активности пользователя</b>
 msg-user-transactions = <b>🧾 Транзакции пользователя</b>
 msg-user-devices = <b>📱 Устройства пользователя ({ $current_count } / { $max_count })</b>
 msg-user-give-access = <b>🔑 Предоставить доступ к плану</b>

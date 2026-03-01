@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .audit_log import AuditLogRepository
 from .broadcast import BroadcastRepository
 from .payment_gateway import PaymentGatewayRepository
 from .plan import PlanRepository
@@ -14,6 +15,7 @@ from .user import UserRepository
 class RepositoriesFacade:
     session: AsyncSession
 
+    audit_logs: AuditLogRepository
     gateways: PaymentGatewayRepository
     plans: PlanRepository
     promocodes: PromocodeRepository
@@ -27,6 +29,7 @@ class RepositoriesFacade:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+        self.audit_logs = AuditLogRepository(session)
         self.gateways = PaymentGatewayRepository(session)
         self.plans = PlanRepository(session)
         self.promocodes = PromocodeRepository(session)

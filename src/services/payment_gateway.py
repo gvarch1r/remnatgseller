@@ -10,6 +10,7 @@ from redis.asyncio import Redis
 from src.bot.keyboards import get_user_keyboard
 from src.core.config import AppConfig
 from src.core.enums import (
+    AuditActionType,
     Currency,
     PaymentGatewayType,
     PurchaseType,
@@ -42,6 +43,7 @@ from src.infrastructure.database.models.sql import PaymentGateway
 from src.infrastructure.payment_gateways import BasePaymentGateway, PaymentGatewayFactory
 from src.infrastructure.redis import RedisRepository
 from src.infrastructure.taskiq.tasks.subscriptions import purchase_subscription_task
+from src.services.audit import AuditService
 from src.services.notification import NotificationService
 from src.services.referral import ReferralService
 from src.services.subscription import SubscriptionService
@@ -56,6 +58,7 @@ class PaymentGatewayService(BaseService):
     subscription_service: SubscriptionService
     payment_gateway_factory: PaymentGatewayFactory
     referral_service: ReferralService
+    audit_service: AuditService
 
     def __init__(
         self,
@@ -71,6 +74,7 @@ class PaymentGatewayService(BaseService):
         payment_gateway_factory: PaymentGatewayFactory,
         referral_service: ReferralService,
         notification_service: NotificationService,
+        audit_service: AuditService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
@@ -79,6 +83,7 @@ class PaymentGatewayService(BaseService):
         self.payment_gateway_factory = payment_gateway_factory
         self.referral_service = referral_service
         self.notification_service = notification_service
+        self.audit_service = audit_service
 
     async def create_default(self) -> None:
         for gateway_type in PaymentGatewayType:
@@ -319,6 +324,13 @@ class PaymentGatewayService(BaseService):
 
         transaction.status = TransactionStatus.COMPLETED
         await self.transaction_service.update(transaction)
+
+        if not transaction.is_test:
+            await self.audit_service.log(
+                user_telegram_id=transaction.user.telegram_id,
+                action_type=AuditActionType.PURCHASE_COMPLETED,
+                details=f"payment_id={payment_id} plan={transaction.plan.name}",
+            )
 
         logger.info(f"Payment succeeded '{payment_id}' for user '{transaction.user.telegram_id}'")
 

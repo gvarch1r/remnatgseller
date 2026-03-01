@@ -1,3 +1,25 @@
+# Audit actions
+audit-action-registered = Регистрация
+audit-action-subscription-created = Создана подписка
+audit-action-subscription-updated = Обновлена подписка
+audit-action-subscription-deleted = Удалена подписка
+audit-action-role-changed = Изменена роль
+audit-action-blocked = Заблокирован
+audit-action-unblocked = Разблокирован
+audit-action-discount-changed = Изменена скидка
+audit-action-points-changed = Изменены баллы
+audit-action-purchase-completed = Покупка завершена
+audit-action-promocode-activated = Активирован промокод
+audit-action-referral-attached = Прикреплён реферал
+audit-action-device-added = Добавлено устройство
+audit-action-device-removed = Удалено устройство
+audit-action-sync-from-remnawave = Синхронизация из Remnawave
+audit-action-sync-from-remnatgseller = Синхронизация из RemnatgSeller
+audit-action-give-subscription = Выдана подписка
+audit-action-give-access = Предоставлен доступ к плану
+audit-action-message-sent = Отправлено сообщение
+audit-empty = Нет записей
+
 # Layout
 space = {" "}
 empty = { "!empty!" }

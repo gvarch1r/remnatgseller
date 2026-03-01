@@ -13,6 +13,7 @@ from redis.asyncio import Redis
 from src.core.config import AppConfig
 from src.core.constants import ASSETS_DIR, REFERRAL_PREFIX, T_ME
 from src.core.enums import (
+    AuditActionType,
     MessageEffect,
     PurchaseType,
     ReferralAccrualStrategy,
@@ -32,6 +33,7 @@ from src.infrastructure.database.models.dto import (
 )
 from src.infrastructure.database.models.sql import Referral, ReferralReward
 from src.infrastructure.redis import RedisRepository
+from src.services.audit import AuditService
 from src.services.notification import NotificationService
 from src.services.settings import SettingsService
 from src.services.user import UserService
@@ -43,6 +45,7 @@ class ReferralService(BaseService):
     uow: UnitOfWork
     user_service: UserService
     settings_service: SettingsService
+    audit_service: AuditService
     _bot_username: Optional[str]
 
     def __init__(
@@ -57,12 +60,14 @@ class ReferralService(BaseService):
         user_service: UserService,
         settings_service: SettingsService,
         notification_service: NotificationService,
+        audit_service: AuditService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
         self.user_service = user_service
         self.settings_service = settings_service
         self.notification_service = notification_service
+        self.audit_service = audit_service
         self._bot_username: Optional[str] = None
 
     async def create_referral(
@@ -193,6 +198,12 @@ class ReferralService(BaseService):
         )
 
         await self.create_referral(referrer, user, level)
+
+        await self.audit_service.log(
+            user_telegram_id=user.telegram_id,
+            action_type=AuditActionType.REFERRAL_ATTACHED,
+            details=f"referrer={referrer.telegram_id}",
+        )
 
         if await self.settings_service.is_referral_enable():
             await self.notification_service.notify_user(

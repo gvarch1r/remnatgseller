@@ -24,6 +24,7 @@ from src.bot.keyboards import get_user_keyboard
 from src.core.config import AppConfig
 from src.core.constants import DATETIME_FORMAT, IMPORTED_TAG
 from src.core.enums import (
+    AuditActionType,
     RemnaNodeEvent,
     RemnaUserEvent,
     RemnaUserHwidDevicesEvent,
@@ -57,6 +58,7 @@ from src.infrastructure.taskiq.tasks.notifications import (
     send_subscription_expire_notification_task,
     send_subscription_limited_notification_task,
 )
+from src.services.audit import AuditService
 from src.services.notification import NotificationService
 from src.services.subscription import SubscriptionService
 from src.services.user import UserService
@@ -68,6 +70,7 @@ class RemnawaveService(BaseService):
     remnawave: RemnawaveSDK
     user_service: UserService
     subscription_service: SubscriptionService
+    audit_service: AuditService
 
     def __init__(
         self,
@@ -81,12 +84,14 @@ class RemnawaveService(BaseService):
         user_service: UserService,
         subscription_service: SubscriptionService,
         notification_service: NotificationService,
+        audit_service: AuditService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.remnawave = remnawave
         self.user_service = user_service
         self.subscription_service = subscription_service
         self.notification_service = notification_service
+        self.audit_service = audit_service
 
     async def try_connection(self) -> None:
         response = await self.remnawave.system.get_stats()
@@ -518,10 +523,20 @@ class RemnawaveService(BaseService):
 
         if event == RemnaUserHwidDevicesEvent.ADDED:
             logger.debug(f"Device '{device.hwid}' added for RemnaUser '{remna_user.telegram_id}'")
+            await self.audit_service.log(
+                user_telegram_id=user.telegram_id,
+                action_type=AuditActionType.DEVICE_ADDED,
+                details=f"{device.platform} {device.device_model}",
+            )
             i18n_key = "ntf-event-user-hwid-added"
 
         elif event == RemnaUserHwidDevicesEvent.DELETED:
             logger.debug(f"Device '{device.hwid}' deleted for RemnaUser '{remna_user.telegram_id}'")
+            await self.audit_service.log(
+                user_telegram_id=user.telegram_id,
+                action_type=AuditActionType.DEVICE_REMOVED,
+                details=f"{device.platform} {device.device_model}",
+            )
             i18n_key = "ntf-event-user-hwid-deleted"
 
         else:
