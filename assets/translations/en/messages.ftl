@@ -104,6 +104,89 @@ msg-remnawave-inbounds =
 
     { $inbound }
 
+# Subscription
+msg-subscription-main = <b>💳 Subscription</b>
+msg-subscription-plans = <b>📦 Select a plan</b>
+msg-subscription-add-devices = <b>➕ Add devices</b>
+
+    Select the number of devices to add to your subscription.
+
+msg-subscription-details =
+    <b>{ $plan }:</b>
+    <blockquote>
+    { $description ->
+    [0] { empty }
+    *[HAS]
+    { $description }
+    }
+
+    • <b>Traffic limit</b>: { $traffic }
+    • <b>Device limit</b>: { $devices }
+    { $period ->
+    [0] { empty }
+    *[HAS] • <b>Duration</b>: { $period }
+    }
+    { $final_amount ->
+    [0] { empty }
+    *[HAS] • <b>Price</b>: { frg-payment-amount }
+    }
+    </blockquote>
+
+msg-subscription-duration =
+    <b>⏳ Select duration</b>
+
+    { msg-subscription-details }
+
+msg-subscription-payment-method =
+    <b>💳 Select payment method</b>
+
+    { msg-subscription-details }
+
+msg-subscription-confirm =
+    { $purchase_type ->
+    [RENEW] <b>🛒 Confirm subscription renewal</b>
+    [CHANGE] <b>🛒 Confirm subscription change</b>
+    *[OTHER] <b>🛒 Confirm subscription purchase</b>
+    }
+
+    { msg-subscription-details }
+
+    { $purchase_type ->
+    [RENEW] <i>⚠️ Current subscription will be <u>extended</u> for the selected period.</i>
+    [CHANGE] <i>⚠️ Current subscription will be <u>replaced</u> without recalculating remaining time.</i>
+    *[OTHER] { empty }
+    }
+
+msg-subscription-new-success = To start using our service, click <code>`{ btn-subscription-connect }`</code> and follow the instructions!
+msg-subscription-renew-success = Your subscription has been renewed for { $added_duration }.
+msg-subscription-trial =
+    <b>✅ Trial subscription received!</b>
+
+    { msg-subscription-new-success }
+
+msg-subscription-success =
+    <b>✅ Payment successful!</b>
+
+    { $purchase_type ->
+    [NEW] { msg-subscription-new-success }
+    [RENEW] { msg-subscription-renew-success }
+    [CHANGE] { msg-subscription-change-success }
+    [ADD_DEVICES] { msg-subscription-add-devices-success }
+    *[OTHER] { $purchase_type }
+    }
+
+msg-subscription-add-devices-success = Added { $added_duration } devices to your subscription.
+msg-subscription-change-success =
+    Your subscription has been changed.
+
+    <b>{ $plan_name }</b>
+    { frg-subscription }
+
+msg-subscription-failed =
+    <b>❌ An error occurred!</b>
+
+    Don't worry, support has been notified and will contact you shortly. We apologize for the inconvenience.
+
 # User
 msg-user-audit = <b>📋 User activity history</b>
 

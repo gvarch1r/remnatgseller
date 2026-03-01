@@ -567,7 +567,12 @@ async def on_payment_method_select(
         if payment_data:
             cache[cache_key] = payment_data
             _save_payment_data(dialog_manager, payment_data)
-        await dialog_manager.switch_to(state=Subscription.CONFIRM)
+            await dialog_manager.switch_to(state=Subscription.CONFIRM)
+        else:
+            await notification_service.notify_user(
+                user=user,
+                payload=MessagePayload(i18n_key="ntf-subscription-payment-creation-failed"),
+            )
         return
 
     selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
@@ -595,7 +600,12 @@ async def on_payment_method_select(
     if payment_data:
         cache[cache_key] = payment_data
         _save_payment_data(dialog_manager, payment_data)
-    await dialog_manager.switch_to(state=Subscription.CONFIRM)
+        await dialog_manager.switch_to(state=Subscription.CONFIRM)
+    else:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-payment-creation-failed"),
+        )
 
 
 @inject

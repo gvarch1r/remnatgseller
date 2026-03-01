@@ -50,3 +50,25 @@ frg-build-info =
     Commit: <a href="{ $commit_url }">{ $commit }</a>
     </blockquote>
     }
+
+frg-subscription =
+    <blockquote>
+    • <b>Traffic limit</b>: { $traffic_limit }
+    • <b>Device limit</b>: { $device_limit }
+    • <b>Remaining</b>: { $expire_time }
+    </blockquote>
+
+frg-payment-amount = { $final_amount }{ $currency } { $discount_percent ->
+    [0] { space }
+    *[more] { space } <strike>{ $original_amount }{ $currency }</strike> (-{ $discount_percent }%)
+    }
+
+purchase-type = { $purchase_type ->
+    [NEW] Purchase
+    [RENEW] Renewal
+    [CHANGE] Change
+    [ADD_DEVICES] Add devices
+    *[OTHER] { $purchase_type }
+}
+
+payment-invoice-description-add-devices = { purchase-type } devices: { $name }

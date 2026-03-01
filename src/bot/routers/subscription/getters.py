@@ -231,8 +231,8 @@ async def confirm_getter(
     purchase_type = dialog_manager.dialog_data.get("purchase_type")
     selected_payment_method = dialog_manager.dialog_data["selected_payment_method"]
     payment_gateway = await payment_gateway_service.get_by_type(selected_payment_method)
-    result_url = dialog_manager.dialog_data["payment_url"]
-    pricing_data = dialog_manager.dialog_data["final_pricing"]
+    result_url = dialog_manager.dialog_data.get("payment_url") or ""
+    pricing_data = dialog_manager.dialog_data.get("final_pricing", "{}")
     pricing = PriceDetailsDto.model_validate_json(pricing_data)
     gateways = await payment_gateway_service.filter_active()
 
