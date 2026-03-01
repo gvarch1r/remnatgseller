@@ -48,8 +48,14 @@ class I18nProvider(Provider):
         user: Optional[UserDto] = middleware_data.get(USER_KEY)
 
         if user:
-            logger.debug(f"Translator for user '{user.telegram_id}' with locale={user.language}")
-            return hub.get_translator_by_locale(locale=user.language)
+            locale = user.language
+            if locale not in config.locales:
+                locale = config.default_locale
+                logger.debug(
+                    f"User '{user.telegram_id}' locale '{user.language}' not in locales, "
+                    f"using default '{locale}'"
+                )
+            return hub.get_translator_by_locale(locale=locale)
 
         else:
             logger.debug(

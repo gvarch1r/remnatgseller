@@ -19,22 +19,19 @@ async def on_close_notification(callback: CallbackQuery, bot: Bot, user: UserDto
     logger.info(f"{log(user)} Closed notification '{notification_id}'")
 
     try:
-        await notification.delete()
         await callback.answer()
-        logger.debug(f"Notification '{notification_id}' for user '{user.telegram_id}' deleted")
-    except Exception as exception:
-        logger.error(f"Failed to delete notification '{notification_id}'. Exception: {exception}")
+    except Exception:
+        pass  # query too old / already answered — ignore
 
+    try:
+        await notification.delete()
+        logger.debug(f"Notification '{notification_id}' for user '{user.telegram_id}' deleted")
+    except Exception:
         try:
-            logger.debug(f"Attempting to remove keyboard from notification '{notification_id}'")
             await bot.edit_message_reply_markup(
                 chat_id=notification.chat.id,
                 message_id=notification.message_id,
                 reply_markup=None,
             )
-            logger.debug(f"Keyboard removed from notification '{notification_id}'")
-        except Exception as exception:
-            logger.error(
-                f"Failed to remove keyboard from notification '{notification_id}'. "
-                f"Exception: {exception}"
-            )
+        except Exception:
+            pass  # message deleted or too old — ignore
