@@ -6,6 +6,7 @@ from aiogram_dialog.widgets.common import WhenCondition
 from aiogram_dialog.widgets.text import Text
 from dishka import AsyncContainer
 from fluentogram import TranslatorHub, TranslatorRunner
+from fluentogram.exceptions import KeyNotFoundError
 from loguru import logger
 from magic_filter import MagicFilter
 
@@ -58,10 +59,12 @@ class I18nFormat(Text):
         if self.mapping:
             data = await self._transform(data, dialog_manager)
 
-        data = get_translated_kwargs(i18n, data)
-        key = self.key.format_map(data)
         try:
+            data = get_translated_kwargs(i18n, data)
+            key = self.key.format_map(data)
             return i18n_postprocess_text(text=i18n.get(key, **data))
-        except KeyError:
+        except KeyNotFoundError:
             fallback = hub.get_translator_by_locale(locale=config.default_locale)
+            data = get_translated_kwargs(fallback, data)
+            key = self.key.format_map(data)
             return i18n_postprocess_text(text=fallback.get(key, **data))
