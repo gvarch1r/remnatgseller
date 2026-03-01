@@ -8,6 +8,7 @@ from src.bot.routers.extra.test import show_dev_popup
 from src.bot.states import (
     Dashboard,
     DashboardRemnatgseller,
+    DashboardUsers,
     RemnatgsellerGateways,
     RemnatgsellerNotifications,
     RemnatgsellerPlans,
@@ -68,10 +69,11 @@ remnatgseller = Window(
             id="logs",
             on_click=on_logs_request,
         ),
-        Button(
+        Start(
             text=I18nFormat("btn-remnatgseller-audit"),
             id="audit",
-            on_click=show_dev_popup,
+            state=DashboardUsers.MAIN,
+            mode=StartMode.RESET_STACK,
         ),
     ),
     Row(
