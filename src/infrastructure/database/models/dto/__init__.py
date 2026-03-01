@@ -1,5 +1,6 @@
 from .base import BaseDto, TrackableDto
 from .broadcast import BroadcastDto, BroadcastMessageDto
+from .device_addon import DeviceAddonDto, DeviceAddonPriceDto
 from .payment_gateway import (
     AnyGatewaySettingsDto,
     CryptomusGatewaySettingsDto,
@@ -34,6 +35,8 @@ __all__ = [
     "BaseDto",
     "BroadcastDto",
     "BroadcastMessageDto",
+    "DeviceAddonDto",
+    "DeviceAddonPriceDto",
     "TrackableDto",
     "AnyGatewaySettingsDto",
     "CryptomusGatewaySettingsDto",

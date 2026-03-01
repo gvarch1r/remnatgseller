@@ -236,13 +236,20 @@ class PaymentGatewayService(BaseService):
         gateway_instance = await self._get_gateway_instance(gateway_type)
 
         i18n = self.translator_hub.get_translator_by_locale(locale=user.language)
-        key, kw = i18n_format_days(plan.duration)
-        details = i18n.get(
-            "payment-invoice-description",
-            purchase_type=purchase_type,
-            name=plan.name,
-            duration=i18n.get(key, **kw),
-        )
+        if purchase_type == PurchaseType.ADD_DEVICES:
+            details = i18n.get(
+                "payment-invoice-description-add-devices",
+                purchase_type=purchase_type,
+                name=plan.name,
+            )
+        else:
+            key, kw = i18n_format_days(plan.duration)
+            details = i18n.get(
+                "payment-invoice-description",
+                purchase_type=purchase_type,
+                name=plan.name,
+                duration=i18n.get(key, **kw),
+            )
 
         transaction_data = {
             "status": TransactionStatus.PENDING,
@@ -347,6 +354,7 @@ class PaymentGatewayService(BaseService):
             PurchaseType.NEW: "ntf-event-subscription-new",
             PurchaseType.RENEW: "ntf-event-subscription-renew",
             PurchaseType.CHANGE: "ntf-event-subscription-change",
+            PurchaseType.ADD_DEVICES: "ntf-event-subscription-add-devices",
         }
         i18n_key = i18n_keys[transaction.purchase_type]
 

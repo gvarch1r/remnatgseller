@@ -14,7 +14,13 @@ from src.core.utils.formatters import (
     i18n_format_expire_time,
     i18n_format_traffic_limit,
 )
-from src.infrastructure.database.models.dto import PlanDto, PriceDetailsDto, UserDto
+from src.infrastructure.database.models.dto import (
+    DeviceAddonDto,
+    PlanDto,
+    PriceDetailsDto,
+    UserDto,
+)
+from src.services.device_addon import DeviceAddonService
 from src.services.payment_gateway import PaymentGatewayService
 from src.services.plan import PlanService
 from src.services.pricing import PricingService
@@ -29,10 +35,44 @@ async def subscription_getter(
 ) -> dict[str, Any]:
     has_active = bool(user.current_subscription and not user.current_subscription.is_trial)
     is_unlimited = user.current_subscription.is_unlimited if user.current_subscription else False
+    has_devices_limit = (
+        user.current_subscription.has_devices_limit if user.current_subscription else False
+    )
     return {
         "has_active_subscription": has_active,
         "is_not_unlimited": not is_unlimited,
+        "has_devices_limit": has_devices_limit,
     }
+
+
+@inject
+async def device_addons_getter(
+    dialog_manager: DialogManager,
+    device_addon_service: FromDishka[DeviceAddonService],
+    settings_service: FromDishka[SettingsService],
+    pricing_service: FromDishka[PricingService],
+    user: UserDto,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    addons = await device_addon_service.get_active()
+    currency = await settings_service.get_default_currency()
+    formatted = []
+    for addon in addons:
+        price = addon.get_price(currency)
+        if price is None:
+            continue
+        pricing = pricing_service.calculate(user, price, currency)
+        formatted.append(
+            {
+                "id": addon.id,
+                "device_count": addon.device_count,
+                "final_amount": pricing.final_amount,
+                "discount_percent": pricing.discount_percent,
+                "original_amount": pricing.original_amount,
+                "currency": currency.symbol,
+            }
+        )
+    return {"device_addons": formatted}
 
 
 @inject
@@ -113,19 +153,48 @@ async def payment_method_getter(
     **kwargs: Any,
 ) -> dict[str, Any]:
     adapter = DialogDataAdapter(dialog_manager)
-    plan = adapter.load(PlanDto)
+    purchase_type = dialog_manager.dialog_data.get("purchase_type")
+    gateways = await payment_gateway_service.filter_active()
 
+    if purchase_type == PurchaseType.ADD_DEVICES:
+        addon = adapter.load(DeviceAddonDto)
+        if not addon:
+            raise ValueError("DeviceAddonDto not found in dialog data")
+        payment_methods = []
+        for gateway in gateways:
+            price = addon.get_price(gateway.currency)
+            if price is not None:
+                payment_methods.append(
+                    {
+                        "gateway_type": gateway.type,
+                        "price": price,
+                        "currency": gateway.currency.symbol,
+                    }
+                )
+        period_key, period_kw = i18n_format_device_limit(addon.device_count)
+        devices_str = i18n.get(period_key, **period_kw)
+        return {
+            "plan": f"+{addon.device_count}",
+            "description": False,
+            "type": None,
+            "devices": devices_str,
+            "traffic": i18n_format_traffic_limit(-1),
+            "period": f"+{addon.device_count}",
+            "payment_methods": payment_methods,
+            "final_amount": 0,
+            "currency": "",
+            "only_single_duration": False,
+            "is_add_devices": True,
+        }
+
+    plan = adapter.load(PlanDto)
     if not plan:
         raise ValueError("PlanDto not found in dialog data")
-
-    gateways = await payment_gateway_service.filter_active()
     selected_duration = dialog_manager.dialog_data["selected_duration"]
     only_single_duration = dialog_manager.dialog_data.get("only_single_duration", False)
     duration = plan.get_duration(selected_duration)
-
     if not duration:
         raise ValueError(f"Duration '{selected_duration}' not found in plan '{plan.name}'")
-
     payment_methods = []
     for gateway in gateways:
         payment_methods.append(
@@ -135,9 +204,7 @@ async def payment_method_getter(
                 "currency": gateway.currency.symbol,
             }
         )
-
     key, kw = i18n_format_days(duration.days)
-
     return {
         "plan": plan.name,
         "description": plan.description or False,
@@ -149,6 +216,7 @@ async def payment_method_getter(
         "final_amount": 0,
         "currency": "",
         "only_single_duration": only_single_duration,
+        "is_add_devices": False,
     }
 
 
@@ -160,34 +228,57 @@ async def confirm_getter(
     **kwargs: Any,
 ) -> dict[str, Any]:
     adapter = DialogDataAdapter(dialog_manager)
-    plan = adapter.load(PlanDto)
-
-    if not plan:
-        raise ValueError("PlanDto not found in dialog data")
-
-    selected_duration = dialog_manager.dialog_data["selected_duration"]
-    only_single_duration = dialog_manager.dialog_data.get("only_single_duration", False)
-    is_free = dialog_manager.dialog_data.get("is_free", False)
+    purchase_type = dialog_manager.dialog_data.get("purchase_type")
     selected_payment_method = dialog_manager.dialog_data["selected_payment_method"]
-    purchase_type = dialog_manager.dialog_data["purchase_type"]
     payment_gateway = await payment_gateway_service.get_by_type(selected_payment_method)
-    duration = plan.get_duration(selected_duration)
-
-    if not duration:
-        raise ValueError(f"Duration '{selected_duration}' not found in plan '{plan.name}'")
-
-    if not payment_gateway:
-        raise ValueError(f"Not found PaymentGateway by selected type '{selected_payment_method}'")
-
     result_url = dialog_manager.dialog_data["payment_url"]
     pricing_data = dialog_manager.dialog_data["final_pricing"]
     pricing = PriceDetailsDto.model_validate_json(pricing_data)
-
-    key, kw = i18n_format_days(duration.days)
     gateways = await payment_gateway_service.filter_active()
 
+    if purchase_type == PurchaseType.ADD_DEVICES:
+        addon = adapter.load(DeviceAddonDto)
+        if not addon:
+            raise ValueError("DeviceAddonDto not found in dialog data")
+        if not payment_gateway:
+            raise ValueError(f"Not found PaymentGateway by type '{selected_payment_method}'")
+        period_key, period_kw = i18n_format_device_limit(addon.device_count)
+        devices_str = i18n.get(period_key, **period_kw)
+        return {
+            "purchase_type": purchase_type,
+            "is_add_devices": True,
+            "plan": f"+{addon.device_count}",
+            "description": False,
+            "type": None,
+            "devices": devices_str,
+            "traffic": i18n_format_traffic_limit(-1),
+            "period": f"+{addon.device_count}",
+            "payment_method": selected_payment_method,
+            "final_amount": pricing.final_amount,
+            "discount_percent": pricing.discount_percent,
+            "original_amount": pricing.original_amount,
+            "currency": payment_gateway.currency.symbol,
+            "url": result_url,
+            "only_single_gateway": len(gateways) == 1,
+            "only_single_duration": False,
+            "is_free": pricing.is_free,
+        }
+
+    plan = adapter.load(PlanDto)
+    if not plan:
+        raise ValueError("PlanDto not found in dialog data")
+    selected_duration = dialog_manager.dialog_data["selected_duration"]
+    only_single_duration = dialog_manager.dialog_data.get("only_single_duration", False)
+    is_free = dialog_manager.dialog_data.get("is_free", False)
+    duration = plan.get_duration(selected_duration)
+    if not duration:
+        raise ValueError(f"Duration '{selected_duration}' not found in plan '{plan.name}'")
+    if not payment_gateway:
+        raise ValueError(f"Not found PaymentGateway by selected type '{selected_payment_method}'")
+    key, kw = i18n_format_days(duration.days)
     return {
         "purchase_type": purchase_type,
+        "is_add_devices": False,
         "plan": plan.name,
         "description": plan.description or False,
         "type": plan.type,
@@ -228,6 +319,7 @@ async def success_payment_getter(
     dialog_manager: DialogManager,
     config: AppConfig,
     user: UserDto,
+    i18n: FromDishka[TranslatorRunner],
     **kwargs: Any,
 ) -> dict[str, Any]:
     start_data = cast(dict[str, Any], dialog_manager.start_data)
@@ -237,13 +329,21 @@ async def success_payment_getter(
     if not subscription:
         raise ValueError(f"User '{user.telegram_id}' has no active subscription after purchase")
 
+    if purchase_type == PurchaseType.ADD_DEVICES:
+        device_count = start_data.get("device_count", 0)
+        key, kw = i18n_format_device_limit(device_count)
+        added_duration = i18n.get(key, **kw)
+    else:
+        key, kw = i18n_format_days(subscription.plan.duration)
+        added_duration = i18n.get(key, **kw)
+
     return {
         "purchase_type": purchase_type,
         "plan_name": subscription.plan.name,
         "traffic_limit": i18n_format_traffic_limit(subscription.traffic_limit),
         "device_limit": i18n_format_device_limit(subscription.device_limit),
         "expire_time": i18n_format_expire_time(subscription.expire_at),
-        "added_duration": i18n_format_days(subscription.plan.duration),
+        "added_duration": added_duration,
         "is_app": config.bot.is_mini_app,
         "url": config.bot.mini_app_url or subscription.url,
         "connectable": True,

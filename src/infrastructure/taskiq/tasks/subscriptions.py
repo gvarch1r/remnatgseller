@@ -185,6 +185,22 @@ async def purchase_subscription_task(
             await subscription_service.update(subscription)
             logger.debug(f"Renewed subscription for user '{user.telegram_id}'")
 
+        elif purchase_type == PurchaseType.ADD_DEVICES:
+            if not subscription:
+                raise ValueError(f"No subscription for add devices for user '{user.telegram_id}'")
+            device_count = plan.device_limit
+            subscription.device_limit += device_count
+            await remnawave_service.updated_user(
+                user=user,
+                uuid=subscription.user_remna_id,
+                subscription=subscription,
+            )
+            await subscription_service.update(subscription)
+            logger.debug(f"Added {device_count} devices for user '{user.telegram_id}'")
+            await redirect_to_successed_payment_task.kiq(user, purchase_type, device_count)
+            logger.info(f"Purchase subscription task completed for user '{user.telegram_id}'")
+            return
+
         elif purchase_type == PurchaseType.CHANGE or has_trial:
             if not subscription:
                 raise ValueError(f"No subscription found for change for user '{user.telegram_id}'")
@@ -219,7 +235,7 @@ async def purchase_subscription_task(
                 f"Unknown purchase type '{purchase_type}' for user '{user.telegram_id}'"
             )
 
-        await redirect_to_successed_payment_task.kiq(user, purchase_type)
+        await redirect_to_successed_payment_task.kiq(user, purchase_type, None)
         logger.info(f"Purchase subscription task completed for user '{user.telegram_id}'")
 
     except Exception as exception:

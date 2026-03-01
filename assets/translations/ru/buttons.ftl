@@ -407,6 +407,12 @@ btn-importer-import-active = ❇️ Импортировать активных
 btn-subscription-new = 💸 Купить подписку
 btn-subscription-renew = 🔄 Продлить
 btn-subscription-change = 🔃 Изменить
+btn-subscription-add-devices = ➕ Докупить устройства
+btn-subscription-addon = +{ $device_count } устройств | { $final_amount ->
+    [0] Бесплатно
+    *[other] { $final_amount } { $currency }
+}
+btn-subscription-back-addon = ⬅️ Назад к выбору
 btn-subscription-promocode = 🎟 Активировать промокод
 btn-subscription-payment-method = { gateway-type } | { $price } { $currency }
 btn-subscription-pay = 💳 Оплатить

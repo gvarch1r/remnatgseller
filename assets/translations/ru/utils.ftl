@@ -345,8 +345,11 @@ purchase-type = { $purchase_type ->
     [NEW] Покупка
     [RENEW] Продление
     [CHANGE] Изменение
+    [ADD_DEVICES] Докупка устройств
     *[OTHER] { $purchase_type }
 }
+
+payment-invoice-description-add-devices = { purchase-type } устройств: { $name }
 
 traffic-strategy = { $strategy_type -> 
     [NO_RESET] При оплате

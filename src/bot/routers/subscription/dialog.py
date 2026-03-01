@@ -11,6 +11,7 @@ from src.core.enums import BannerName, PaymentGatewayType, PurchaseType
 
 from .getters import (
     confirm_getter,
+    device_addons_getter,
     duration_getter,
     getter_connect,
     payment_method_getter,
@@ -19,6 +20,8 @@ from .getters import (
     success_payment_getter,
 )
 from .handlers import (
+    on_add_devices_click,
+    on_device_addon_select,
     on_duration_select,
     on_get_subscription,
     on_payment_method_select,
@@ -47,6 +50,12 @@ subscription = Window(
             id=f"{PURCHASE_PREFIX}{PurchaseType.CHANGE}",
             on_click=on_subscription_plans,
             when=F["has_active_subscription"],
+        ),
+        Button(
+            text=I18nFormat("btn-subscription-add-devices"),
+            id=f"{PURCHASE_PREFIX}{PurchaseType.ADD_DEVICES}",
+            on_click=on_add_devices_click,
+            when=F["has_active_subscription"] & F["has_devices_limit"],
         ),
     ),
     # Row(
@@ -124,6 +133,40 @@ duration = Window(
     getter=duration_getter,
 )
 
+device_addons = Window(
+    Banner(BannerName.SUBSCRIPTION),
+    I18nFormat("msg-subscription-add-devices"),
+    Group(
+        Select(
+            text=I18nFormat(
+                "btn-subscription-addon",
+                device_count=F["item"]["device_count"],
+                final_amount=F["item"]["final_amount"],
+                discount_percent=F["item"]["discount_percent"],
+                original_amount=F["item"]["original_amount"],
+                currency=F["item"]["currency"],
+            ),
+            id=f"{PURCHASE_PREFIX}select_addon",
+            item_id_getter=lambda item: item["id"],
+            items="device_addons",
+            type_factory=int,
+            on_click=on_device_addon_select,
+        ),
+        width=2,
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id=f"{PURCHASE_PREFIX}back",
+            state=Subscription.MAIN,
+        ),
+    ),
+    *back_main_menu_button,
+    IgnoreUpdate(),
+    state=Subscription.ADD_DEVICES_ADDON,
+    getter=device_addons_getter,
+)
+
 payment_method = Window(
     Banner(BannerName.SUBSCRIPTION),
     I18nFormat("msg-subscription-payment-method"),
@@ -144,10 +187,16 @@ payment_method = Window(
     ),
     Row(
         SwitchTo(
+            text=I18nFormat("btn-subscription-back-addon"),
+            id=f"{PURCHASE_PREFIX}back_to_addon",
+            state=Subscription.ADD_DEVICES_ADDON,
+            when=F["is_add_devices"],
+        ),
+        SwitchTo(
             text=I18nFormat("btn-subscription-back-duration"),
-            id=f"{PURCHASE_PREFIX}back",
+            id=f"{PURCHASE_PREFIX}back_to_duration",
             state=Subscription.DURATION,
-            when=~F["only_single_duration"],
+            when=~F["only_single_duration"] & ~F["is_add_devices"],
         ),
     ),
     *back_main_menu_button,
@@ -174,6 +223,12 @@ confirm = Window(
     ),
     Row(
         SwitchTo(
+            text=I18nFormat("btn-subscription-back-addon"),
+            id=f"{PURCHASE_PREFIX}back_addon",
+            state=Subscription.ADD_DEVICES_ADDON,
+            when=F["is_add_devices"] & (F["only_single_gateway"] | F["is_free"]),
+        ),
+        SwitchTo(
             text=I18nFormat("btn-subscription-back-payment-method"),
             id=f"{PURCHASE_PREFIX}back_payment_method",
             state=Subscription.PAYMENT_METHOD,
@@ -183,7 +238,8 @@ confirm = Window(
             text=I18nFormat("btn-subscription-back-duration"),
             id=f"{PURCHASE_PREFIX}back_duration",
             state=Subscription.DURATION,
-            when=F["only_single_gateway"] & ~F["only_single_duration"] | F["is_free"],
+            when=~F["is_add_devices"]
+            & ((F["only_single_gateway"] & ~F["only_single_duration"]) | F["is_free"]),
         ),
     ),
     *back_main_menu_button,
@@ -227,6 +283,7 @@ failed = Window(
 router = Dialog(
     subscription,
     plans,
+    device_addons,
     duration,
     payment_method,
     confirm,

@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from src.services.access import AccessService
+from src.services.device_addon import DeviceAddonService
 from src.services.audit import AuditService
 from src.services.broadcast import BroadcastService
 from src.services.command import CommandService
@@ -23,6 +24,7 @@ class ServicesProvider(Provider):
     scope = Scope.APP
 
     command_service = provide(source=CommandService)
+    device_addon_service = provide(source=DeviceAddonService, scope=Scope.REQUEST)
     access_service = provide(source=AccessService, scope=Scope.REQUEST)
     audit_service = provide(source=AuditService, scope=Scope.REQUEST)
     notification_service = provide(source=NotificationService, scope=Scope.REQUEST)

@@ -949,6 +949,9 @@ msg-notifications-system = <b>⚙️ Системные уведомления</
 # Subscription
 msg-subscription-main = <b>💳 Подписка</b>
 msg-subscription-plans = <b>📦 Выберите план</b>
+msg-subscription-add-devices = <b>➕ Докупка устройств</b>
+
+    Выберите количество устройств для добавления к подписке.
 msg-subscription-new-success = Чтобы начать пользоваться нашим сервисом, нажмите кнопку <code>`{ btn-subscription-connect }`</code> и следуйте инструкциям!
 msg-subscription-renew-success = Ваша подписка продлена на { $added_duration }.
 
@@ -1010,8 +1013,11 @@ msg-subscription-success =
     [NEW] { msg-subscription-new-success }
     [RENEW] { msg-subscription-renew-success }
     [CHANGE] { msg-subscription-change-success }
+    [ADD_DEVICES] { msg-subscription-add-devices-success }
     *[OTHER] { $purchase_type }
     }
+
+msg-subscription-add-devices-success = Добавлено { $added_duration } устройств к вашей подписке.
 
 msg-subscription-change-success = 
     Ваша подписка была изменена.

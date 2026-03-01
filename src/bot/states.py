@@ -16,6 +16,7 @@ class Notification(StatesGroup):
 
 class Subscription(StatesGroup):
     MAIN = State()
+    ADD_DEVICES_ADDON = State()
     PROMOCODE = State()
     PLANS = State()
     DURATION = State()

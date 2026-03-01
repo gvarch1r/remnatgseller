@@ -60,6 +60,7 @@ class PurchaseType(UpperStrEnum):
     NEW = auto()
     RENEW = auto()
     CHANGE = auto()
+    ADD_DEVICES = auto()
 
 
 class AuditActionType(UpperStrEnum):

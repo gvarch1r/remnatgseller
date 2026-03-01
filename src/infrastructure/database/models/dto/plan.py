@@ -66,6 +66,22 @@ class PlanSnapshotDto(TrackableDto):
             external_squad=None,
         )
 
+    @classmethod
+    def device_addon(cls, device_count: int) -> "PlanSnapshotDto":
+        """Snapshot for ADD_DEVICES transaction (duration=0, device_limit=addon count)."""
+        return cls(
+            id=-2,
+            name=f"+{device_count}",
+            tag=None,
+            type=PlanType.DEVICES,
+            traffic_limit=-1,
+            device_limit=device_count,
+            duration=0,
+            traffic_limit_strategy=TrafficLimitStrategy.NO_RESET,
+            internal_squads=[],
+            external_squad=None,
+        )
+
 
 class PlanDto(TrackableDto):
     id: Optional[int] = Field(default=None, frozen=True)

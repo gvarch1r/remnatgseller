@@ -1,6 +1,7 @@
 from .audit_log import AuditLog
 from .base import BaseSql
 from .broadcast import Broadcast, BroadcastMessage
+from .device_addon import DeviceAddon, DeviceAddonPrice
 from .payment_gateway import PaymentGateway
 from .plan import Plan, PlanDuration, PlanPrice
 from .promocode import Promocode, PromocodeActivation
@@ -15,6 +16,8 @@ __all__ = [
     "BaseSql",
     "Broadcast",
     "BroadcastMessage",
+    "DeviceAddon",
+    "DeviceAddonPrice",
     "PaymentGateway",
     "Plan",
     "PlanDuration",

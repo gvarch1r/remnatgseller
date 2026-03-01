@@ -16,7 +16,13 @@ from src.core.enums import PaymentGatewayType, PurchaseType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
-from src.infrastructure.database.models.dto import PlanDto, PlanSnapshotDto, UserDto
+from src.infrastructure.database.models.dto import (
+    DeviceAddonDto,
+    PlanDto,
+    PlanSnapshotDto,
+    UserDto,
+)
+from src.services.device_addon import DeviceAddonService
 from src.services.notification import NotificationService
 from src.services.payment_gateway import PaymentGatewayService
 from src.services.plan import PlanService
@@ -37,6 +43,10 @@ class CachedPaymentData(TypedDict):
 
 def _get_cache_key(duration: int, gateway_type: PaymentGatewayType) -> str:
     return f"{duration}:{gateway_type.value}"
+
+
+def _get_addon_cache_key(device_count: int, gateway_type: PaymentGatewayType) -> str:
+    return f"addon:{device_count}:{gateway_type.value}"
 
 
 def _load_payment_data(dialog_manager: DialogManager) -> dict[str, CachedPaymentData]:
@@ -119,6 +129,64 @@ async def _create_payment_and_get_data(
         return None
 
 
+async def _create_payment_add_devices(
+    dialog_manager: DialogManager,
+    device_addon: DeviceAddonDto,
+    gateway_type: PaymentGatewayType,
+    payment_gateway_service: PaymentGatewayService,
+    notification_service: NotificationService,
+    pricing_service: PricingService,
+) -> Optional[CachedPaymentData]:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    payment_gateway = await payment_gateway_service.get_by_type(gateway_type)
+    price = device_addon.get_price(payment_gateway.currency)
+
+    if not price or not payment_gateway:
+        logger.error(f"{log(user)} No price or gateway for addon payment")
+        return None
+
+    plan = PlanSnapshotDto.device_addon(device_addon.device_count)
+    pricing = pricing_service.calculate(user, price, payment_gateway.currency)
+
+    try:
+        result = await payment_gateway_service.create_payment(
+            user=user,
+            plan=plan,
+            pricing=pricing,
+            purchase_type=PurchaseType.ADD_DEVICES,
+            gateway_type=gateway_type,
+        )
+        return CachedPaymentData(
+            payment_id=str(result.id),
+            payment_url=result.url,
+            final_pricing=pricing.model_dump_json(),
+        )
+    except Exception as exception:
+        logger.error(f"{log(user)} Failed to create addon payment: {exception}")
+        traceback_str = traceback.format_exc()
+        error_type_name = type(exception).__name__
+        await notification_service.error_notify(
+            error_id=user.telegram_id,
+            traceback_str=traceback_str,
+            payload=MessagePayload.not_deleted(
+                i18n_key="ntf-event-error",
+                i18n_kwargs={
+                    "user": True,
+                    "user_id": str(user.telegram_id),
+                    "user_name": user.name,
+                    "username": user.username or False,
+                    "error": f"{error_type_name}: Failed to create addon payment",
+                },
+                reply_markup=get_user_keyboard(user.telegram_id),
+            ),
+        )
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-payment-creation-failed"),
+        )
+        return None
+
+
 @inject
 async def on_purchase_type_select(
     purchase_type: PurchaseType,
@@ -181,6 +249,83 @@ async def on_purchase_type_select(
 
     dialog_manager.dialog_data["only_single_plan"] = False
     await dialog_manager.switch_to(state=Subscription.PLANS)
+
+
+@inject
+async def on_add_devices_click(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    device_addon_service: FromDishka[DeviceAddonService],
+    payment_gateway_service: FromDishka[PaymentGatewayService],
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    addons = await device_addon_service.get_active()
+    gateways = await payment_gateway_service.filter_active()
+
+    if not addons:
+        logger.warning(f"{log(user)} No device addons available")
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-addons-not-available"),
+        )
+        return
+
+    if not gateways:
+        logger.warning(f"{log(user)} No active payment gateways")
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-gateways-not-available"),
+        )
+        return
+
+    dialog_manager.dialog_data["purchase_type"] = PurchaseType.ADD_DEVICES
+    dialog_manager.dialog_data.pop(CURRENT_DURATION_KEY, None)
+    dialog_manager.dialog_data.pop(PAYMENT_CACHE_KEY, None)
+    await dialog_manager.switch_to(state=Subscription.ADD_DEVICES_ADDON)
+
+
+@inject
+async def on_device_addon_select(
+    callback: CallbackQuery,
+    widget: Select,
+    dialog_manager: DialogManager,
+    selected_addon_id: int,
+    device_addon_service: FromDishka[DeviceAddonService],
+    payment_gateway_service: FromDishka[PaymentGatewayService],
+    notification_service: FromDishka[NotificationService],
+    pricing_service: FromDishka[PricingService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    addons = await device_addon_service.get_active()
+    addon = next((a for a in addons if a.id == selected_addon_id), None)
+
+    if not addon:
+        raise ValueError(f"Device addon '{selected_addon_id}' not found")
+
+    logger.info(f"{log(user)} Selected device addon +{addon.device_count}")
+    adapter = DialogDataAdapter(dialog_manager)
+    adapter.save(addon)
+
+    gateways = await payment_gateway_service.filter_active()
+    if len(gateways) == 1:
+        payment_data = await _create_payment_add_devices(
+            dialog_manager=dialog_manager,
+            device_addon=addon,
+            gateway_type=gateways[0].type,
+            payment_gateway_service=payment_gateway_service,
+            notification_service=notification_service,
+            pricing_service=pricing_service,
+        )
+        if payment_data:
+            cache = _load_payment_data(dialog_manager)
+            cache[_get_addon_cache_key(addon.device_count, gateways[0].type)] = payment_data
+            _save_payment_data(dialog_manager, payment_data)
+            await dialog_manager.switch_to(state=Subscription.CONFIRM)
+            return
+
+    await dialog_manager.switch_to(state=Subscription.PAYMENT_METHOD)
 
 
 @inject
@@ -397,11 +542,36 @@ async def on_payment_method_select(
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     logger.info(f"{log(user)} Selected payment method '{selected_payment_method}'")
 
-    selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
     dialog_manager.dialog_data[CURRENT_METHOD_KEY] = selected_payment_method
     cache = _load_payment_data(dialog_manager)
-    cache_key = _get_cache_key(selected_duration, selected_payment_method)
+    purchase_type = dialog_manager.dialog_data.get("purchase_type")
 
+    if purchase_type == PurchaseType.ADD_DEVICES:
+        adapter = DialogDataAdapter(dialog_manager)
+        addon = adapter.load(DeviceAddonDto)
+        if not addon:
+            raise ValueError("DeviceAddonDto not found in dialog data")
+        cache_key = _get_addon_cache_key(addon.device_count, selected_payment_method)
+        if cache_key in cache:
+            _save_payment_data(dialog_manager, cache[cache_key])
+            await dialog_manager.switch_to(state=Subscription.CONFIRM)
+            return
+        payment_data = await _create_payment_add_devices(
+            dialog_manager=dialog_manager,
+            device_addon=addon,
+            gateway_type=selected_payment_method,
+            payment_gateway_service=payment_gateway_service,
+            notification_service=notification_service,
+            pricing_service=pricing_service,
+        )
+        if payment_data:
+            cache[cache_key] = payment_data
+            _save_payment_data(dialog_manager, payment_data)
+        await dialog_manager.switch_to(state=Subscription.CONFIRM)
+        return
+
+    selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
+    cache_key = _get_cache_key(selected_duration, selected_payment_method)
     if cache_key in cache:
         logger.info(f"{log(user)} Re-selected same method and duration")
         _save_payment_data(dialog_manager, cache[cache_key])
@@ -409,13 +579,10 @@ async def on_payment_method_select(
         return
 
     logger.info(f"{log(user)} New combination. Creating new payment")
-
     adapter = DialogDataAdapter(dialog_manager)
     plan = adapter.load(PlanDto)
-
     if not plan:
         raise ValueError("PlanDto not found in dialog data")
-
     payment_data = await _create_payment_and_get_data(
         dialog_manager=dialog_manager,
         plan=plan,
@@ -425,11 +592,9 @@ async def on_payment_method_select(
         notification_service=notification_service,
         pricing_service=pricing_service,
     )
-
     if payment_data:
         cache[cache_key] = payment_data
         _save_payment_data(dialog_manager, payment_data)
-
     await dialog_manager.switch_to(state=Subscription.CONFIRM)
 
 

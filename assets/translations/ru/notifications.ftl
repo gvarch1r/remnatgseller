@@ -155,6 +155,20 @@ ntf-event-subscription-change =
     { hdr-plan }
     { frg-plan-snapshot-comparison }
 
+ntf-event-subscription-add-devices =
+    #EventSubscriptionAddDevices
+
+    <b>🔅 Событие: Докупка устройств!</b>
+
+    { hdr-payment }
+    { frg-payment-info }
+
+    { hdr-user }
+    { frg-user-info }
+
+    { hdr-plan }
+    { frg-plan-snapshot }
+
 ntf-event-node-connection-lost =
     #EventNode
 
@@ -411,6 +425,7 @@ ntf-gateway-test-payment-error = <i>❌ Произошла ошибка при �
 ntf-gateway-test-payment-confirmed = <i>✅ Тестовый платеж успешно обработан.</i>
 
 ntf-subscription-plans-not-available = <i>❌ Нет доступных планов.</i>
+ntf-subscription-addons-not-available = <i>❌ Нет доступных опций докупки устройств.</i>
 ntf-subscription-gateways-not-available = <i>❌ Нет доступных платежных систем.</i>
 ntf-subscription-renew-plan-unavailable = <i>❌ Ваш план устарел и не доступен для продления.</i>
 ntf-subscription-payment-creation-failed = <i>❌ Произошла ошибка при создании платежа, попробуйте позже.</i>

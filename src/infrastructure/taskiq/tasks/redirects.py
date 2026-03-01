@@ -53,15 +53,19 @@ async def redirect_to_successed_payment_task(
     purchase_type: PurchaseType,
     bot: FromDishka[Bot],
     bg_manager_factory: FromDishka[BgManagerFactory],
+    device_count: int | None = None,
 ) -> None:
     bg_manager = bg_manager_factory.bg(
         bot=bot,
         user_id=user.telegram_id,
         chat_id=user.telegram_id,
     )
+    data: dict = {"purchase_type": purchase_type}
+    if device_count is not None:
+        data["device_count"] = device_count
     await bg_manager.start(
         state=Subscription.SUCCESS,
-        data={"purchase_type": purchase_type},
+        data=data,
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.DELETE_AND_SEND,
     )
