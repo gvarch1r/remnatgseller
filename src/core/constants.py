@@ -20,6 +20,8 @@ BOT_WEBHOOK_PATH: Final[str] = "/telegram"
 PAYMENTS_WEBHOOK_PATH: Final[str] = "/payments"
 REMNAWAVE_WEBHOOK_PATH: Final[str] = "/remnawave"
 REPOSITORY: Final[str] = "https://github.com/gvarch1r/remnatgseller"
+# Ваши ссылки — измените на свои
+COMMUNITY_URL: Final[str] = "https://t.me/remna_seller"
 
 TIMEZONE: Final[timezone] = timezone.utc
 REMNATGSELLER_PREFIX: Final[str] = "rts_"

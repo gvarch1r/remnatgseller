@@ -9,7 +9,7 @@ from magic_filter import F
 
 from src.bot.states import DashboardUser, MainMenu, Subscription
 from src.bot.widgets.i18n_format import I18nFormat
-from src.core.constants import GOTO_PREFIX, PURCHASE_PREFIX, REPOSITORY, T_ME
+from src.core.constants import COMMUNITY_URL, GOTO_PREFIX, PURCHASE_PREFIX, REPOSITORY, T_ME
 from src.core.enums import PurchaseType
 from src.core.utils.formatters import format_username_to_url
 
@@ -140,28 +140,12 @@ def get_contact_support_keyboard(username: str, text: str) -> InlineKeyboardMark
 
 
 def get_remnatgseller_keyboard() -> InlineKeyboardMarkup:
+    """Кнопки в уведомлении о запуске. Ссылка Telegram — в src/core/constants.py (COMMUNITY_URL)."""
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(
-            text="btn-remnatgseller-github",
-            url=REPOSITORY,
-        ),
-        InlineKeyboardButton(
-            text="btn-remnatgseller-telegram",
-            url=f"{T_ME}remna_shop",
-        ),
-        # InlineKeyboardButton(
-        #     text="btn-remnatgseller-guide",
-        #     url=f"{T_ME}remna_shop",
-        # ),
-    )
-
-    builder.row(
-        InlineKeyboardButton(
-            text="btn-remnatgseller-donate",
-            url="https://yookassa.ru/my/i/Z8AkHJ_F9sO_/l",
-        )
+        InlineKeyboardButton(text="btn-remnatgseller-github", url=REPOSITORY),
+        InlineKeyboardButton(text="btn-remnatgseller-telegram", url=COMMUNITY_URL),
     )
 
     return builder.as_markup()

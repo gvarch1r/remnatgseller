@@ -20,7 +20,7 @@ from src.__version__ import __version__
 from src.bot.keyboards import get_remnatgseller_keyboard
 from src.bot.states import Notification
 from src.core.config import AppConfig
-from src.core.constants import REPOSITORY
+from src.core.constants import COMMUNITY_URL, REPOSITORY
 from src.core.enums import (
     Locale,
     MediaType,
@@ -126,7 +126,11 @@ class NotificationService(BaseService):
         dev = await self.user_service.get(self.config.bot.dev_id) or self._get_temp_dev()
         payload = MessagePayload(
             i18n_key="ntf-remnatgseller-info",
-            i18n_kwargs={"version": __version__, "repository": REPOSITORY},
+            i18n_kwargs={
+                "version": __version__,
+                "repository": REPOSITORY,
+                "community_url": COMMUNITY_URL,
+            },
             reply_markup=get_remnatgseller_keyboard(),
             auto_delete_after=None,
             add_close_button=True,

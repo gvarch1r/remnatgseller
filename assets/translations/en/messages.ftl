@@ -1,3 +1,11 @@
+# RemnatgSeller
+ntf-remnatgseller-info = 
+    <b>💎 RemnatgSeller v{ $version }</b>
+
+    Bot for selling VPN subscriptions. Works with Remnawave panel.
+
+    ⭐ <i>Source code on <a href="{ $repository }">GitHub</a>. Support and updates — in our <a href="{ $community_url }">Telegram</a>.</i>
+
 # RemnaWave
 msg-remnawave-main =
     <b>🌊 RemnaWave</b>{ $version ->
