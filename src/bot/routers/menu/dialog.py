@@ -16,6 +16,7 @@ from magic_filter import F
 from src.bot.keyboards import connect_buttons
 from src.bot.routers.dashboard.users.handlers import on_user_search
 from src.bot.states import Dashboard, MainMenu, Subscription
+from src.core.enums import PurchaseType
 from src.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from src.core.constants import MIDDLEWARE_DATA_KEY, PURCHASE_PREFIX, USER_KEY
 from src.core.enums import BannerName
@@ -109,6 +110,15 @@ devices = Window(
             text=I18nFormat("btn-menu-devices-empty"),
             id="devices_empty",
             when=F["devices_empty"],
+        ),
+    ),
+    Row(
+        Start(
+            text=I18nFormat("btn-subscription-add-devices"),
+            id=f"{PURCHASE_PREFIX}{PurchaseType.ADD_DEVICES}",
+            state=Subscription.ADD_DEVICES_ADDON,
+            data={"purchase_type": PurchaseType.ADD_DEVICES.value},
+            when=F["has_devices_limit"],
         ),
     ),
     ListGroup(

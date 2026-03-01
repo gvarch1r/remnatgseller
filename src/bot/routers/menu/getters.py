@@ -118,6 +118,7 @@ async def devices_getter(
         "max_count": i18n_format_device_limit(user.current_subscription.device_limit),
         "devices": formatted_devices,
         "devices_empty": len(devices) == 0,
+        "has_devices_limit": user.current_subscription.has_devices_limit,
     }
 
 

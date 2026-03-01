@@ -54,6 +54,11 @@ async def device_addons_getter(
     user: UserDto,
     **kwargs: Any,
 ) -> dict[str, Any]:
+    # Copy start_data to dialog_data when opened from menu (e.g. "My devices" -> Add devices)
+    start_data = dialog_manager.start_data or {}
+    if "purchase_type" in start_data:
+        dialog_manager.dialog_data["purchase_type"] = PurchaseType(start_data["purchase_type"])
+
     addons = await device_addon_service.get_active()
     currency = await settings_service.get_default_currency()
     formatted = []
