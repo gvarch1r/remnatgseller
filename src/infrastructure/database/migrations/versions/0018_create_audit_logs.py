@@ -40,30 +40,6 @@ def upgrade() -> None:
         END$$;
     """)
 
-    audit_action_type_enum = sa.Enum(
-        "REGISTERED",
-        "SUBSCRIPTION_CREATED",
-        "SUBSCRIPTION_UPDATED",
-        "SUBSCRIPTION_DELETED",
-        "ROLE_CHANGED",
-        "BLOCKED",
-        "UNBLOCKED",
-        "DISCOUNT_CHANGED",
-        "POINTS_CHANGED",
-        "PURCHASE_COMPLETED",
-        "PROMOCODE_ACTIVATED",
-        "REFERRAL_ATTACHED",
-        "DEVICE_ADDED",
-        "DEVICE_REMOVED",
-        "SYNC_FROM_REMNAWAVE",
-        "SYNC_FROM_REMNATGSELLER",
-        "GIVE_SUBSCRIPTION",
-        "GIVE_ACCESS",
-        "MESSAGE_SENT",
-        name="audit_action_type",
-        create_type=False,
-    )
-
     bind = op.get_bind()
     insp = inspect(bind)
     if "audit_logs" not in insp.get_table_names():
@@ -72,7 +48,11 @@ def upgrade() -> None:
             sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
             sa.Column("user_telegram_id", sa.BigInteger(), nullable=False),
             sa.Column("actor_telegram_id", sa.BigInteger(), nullable=True),
-            sa.Column("action_type", audit_action_type_enum, nullable=False),
+            sa.Column(
+                "action_type",
+                sa.dialects.postgresql.ENUM(name="audit_action_type", create_type=False),
+                nullable=False,
+            ),
             sa.Column("details", sa.Text(), nullable=False, server_default=""),
             sa.Column(
                 "created_at",
