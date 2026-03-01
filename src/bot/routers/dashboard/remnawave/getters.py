@@ -25,7 +25,7 @@ async def system_getter(
     remnawave: FromDishka[RemnawaveSDK],
     i18n: FromDishka[TranslatorRunner],
     hub: FromDishka[TranslatorHub],
-    config: FromDishka[AppConfig],
+    app_config: FromDishka[AppConfig],
     **kwargs: Any,
 ) -> dict[str, Any]:
     result = await remnawave.system.get_stats()
@@ -56,7 +56,7 @@ async def system_getter(
         main_text = i18n.get("msg-remnawave-main", **data)
     except KeyNotFoundError:
         try:
-            fallback = hub.get_translator_by_locale(locale=config.default_locale)
+            fallback = hub.get_translator_by_locale(locale=app_config.default_locale)
             data = get_translated_kwargs(fallback, data)
             main_text = fallback.get("msg-remnawave-main", **data)
         except KeyNotFoundError:
