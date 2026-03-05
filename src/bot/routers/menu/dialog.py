@@ -23,6 +23,7 @@ from src.core.enums import BannerName
 
 from .getters import (
     devices_getter,
+    help_getter,
     invite_about_getter,
     invite_getter,
     locations_getter,
@@ -253,6 +254,21 @@ locations = Window(
     IgnoreUpdate(),
     state=MainMenu.LOCATIONS,
     getter=locations_getter,
+)
+
+help_window = Window(
+    Banner(BannerName.MENU),
+    I18nFormat("msg-help-main"),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=MainMenu.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=MainMenu.HELP,
+    getter=help_getter,
 )
 
 router = Dialog(

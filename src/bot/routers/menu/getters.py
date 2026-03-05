@@ -188,6 +188,11 @@ async def invite_about_getter(
 
 
 @inject
+async def help_getter(**kwargs: Any) -> dict[str, Any]:
+    return {}
+
+
+@inject
 async def locations_getter(
     dialog_manager: DialogManager,
     remnawave_service: FromDishka[RemnawaveService],
