@@ -1,6 +1,7 @@
-from . import dialog, gateways, notifications, plans, referral
+from . import device_addons, dialog, gateways, notifications, plans, referral
 
 __all__ = [
+    "device_addons",
     "dialog",
     "gateways",
     "referral",

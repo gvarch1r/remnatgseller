@@ -31,7 +31,7 @@ def upgrade() -> None:
                 conn.execute(
                     sa.text("""
                         INSERT INTO device_addon_prices (device_addon_id, currency, price)
-                        VALUES (:addon_id, :currency::currency, :price)
+                        VALUES (:addon_id, CAST(:currency AS currency), :price)
                     """),
                     {
                         "addon_id": addon_id,
@@ -46,12 +46,12 @@ def upgrade() -> None:
         conn.execute(
             sa.text("""
                 INSERT INTO device_addon_prices (device_addon_id, currency, price)
-                SELECT da.id, :currency::currency, da.device_count * :price
+                SELECT da.id, CAST(:currency AS currency), da.device_count * :price
                 FROM device_addons da
                 WHERE da.is_active = true
                   AND NOT EXISTS (
                     SELECT 1 FROM device_addon_prices dap
-                    WHERE dap.device_addon_id = da.id AND dap.currency = :currency::currency
+                    WHERE dap.device_addon_id = da.id AND dap.currency = CAST(:currency AS currency)
                   )
             """),
             {"currency": currency, "price": float(price_per_device)},
