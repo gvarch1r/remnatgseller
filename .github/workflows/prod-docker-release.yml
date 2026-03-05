@@ -30,7 +30,7 @@ jobs:
       - name: 🔖 Get latest tag
         id: latest-tag
         uses: JinoArch/get-latest-tag@latest
-        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
+        continue-on-error: true
 
       - name: 🏷️ Define Build Args
         id: vars
