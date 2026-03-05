@@ -277,10 +277,18 @@ class RemnawaveService(BaseService):
             logger.warning(f"Failed to fetch nodes for locations: {exc}")
             return []
 
+        nodes_count = len(result)
+        if nodes_count == 0:
+            logger.warning("get_locations_list: API returned 0 nodes")
+            return []
+
         locations = []
         seen = set()
+        skipped = 0
         for node in result:
-            if not node.is_connected or node.is_disabled:
+            # Показываем все ноды; панель может отдавать is_connected иначе
+            if node.is_disabled:
+                skipped += 1
                 continue
             key = (node.country_code, node.name)
             if key in seen:
@@ -291,6 +299,10 @@ class RemnawaveService(BaseService):
                     "country": format_country_code(node.country_code),
                     "name": node.name,
                 }
+            )
+        if skipped and not locations:
+            logger.warning(
+                f"get_locations_list: all {nodes_count} nodes skipped (is_disabled=True)"
             )
         return sorted(locations, key=lambda x: (x["name"], x["country"]))
 
