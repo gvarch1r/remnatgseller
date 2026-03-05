@@ -67,7 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.opt(colors=True).info(
         rf"""
     <cyan>  ╔════════════════════════════════════╗</>
-    <cyan>  ║       🛍 RemnatgSeller            ║</>
+    <cyan>  ║       🛍 RemnatgSeller             ║</>
     <cyan>  ╚════════════════════════════════════╝</>
 
         <green>Version: {__version__}</>

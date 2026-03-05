@@ -104,12 +104,125 @@ msg-remnawave-inbounds =
 
     { $inbound }
 
-# Subscription
-msg-subscription-main = <b>💳 Subscription</b>
-msg-subscription-plans = <b>📦 Select a plan</b>
-msg-subscription-add-devices = <b>➕ Add devices</b>
+# Menu
+msg-main-menu =
+    <i>🔒 Fast and reliable VPN. 24/7 support.</i>
 
-    Select the number of devices to add to your subscription.
+    { hdr-user-profile }
+    { frg-user }
+
+    { hdr-subscription }
+    { $status ->
+    [ACTIVE]
+    { frg-subscription }
+    [EXPIRED]
+    <blockquote>
+    • Subscription expired.
+    
+    <i>{ $is_trial ->
+    [0] Your subscription has expired. Renew it to continue using the service!
+    *[1] Your free trial has ended. Get a subscription to continue using the service!
+    }</i>
+    </blockquote>
+    [LIMITED]
+    <blockquote>
+    • Your traffic has been used up.
+
+    <i>{ $is_trial ->
+    [0] { $traffic_strategy ->
+        [NO_RESET] Renew your subscription to reset traffic and continue!
+        *[RESET] Traffic will reset in { $reset_time }. You can also renew to reset traffic.
+        }
+    *[1] { $traffic_strategy ->
+        [NO_RESET] Get a subscription to continue!
+        *[RESET] Traffic will reset in { $reset_time }. You can also get a subscription.
+        }
+    }</i>
+    </blockquote>
+    [DISABLED]
+    <blockquote>
+    • Your subscription is disabled.
+
+    <i>Contact support to find out why!</i>
+    </blockquote>
+    *[NONE]
+    <blockquote>
+    • You have no active subscription.
+
+    <i>{ $trial_available ->
+    [1] 🎁 A free trial is available — press the button below to get it.
+    *[0] ↘️ Go to "Subscription" to purchase access.
+    }</i>
+    </blockquote>
+    }
+
+msg-menu-devices =
+    <b>📱 My devices</b>
+
+    Here you can remove linked devices.
+    
+    <i>To add devices — press the "Add devices" button below.</i>
+
+msg-locations-main =
+    <b>🌍 Servers</b>
+
+    Available locations for connection:
+
+msg-locations-empty =
+    <b>🌍 Servers</b>
+
+    Server list is temporarily unavailable. Please contact support.
+
+msg-locations-item = { $country } { $name }
+
+msg-help-main =
+    <b>❓ Help & FAQ</b>
+
+    <b>How to connect?</b>
+    <blockquote>
+    After payment, press the "Connect" button and open the configuration page. Download an app (V2Ray, Clash, Nekoray, etc.) and import the config or scan the QR code.
+    </blockquote>
+
+    <b>How to add devices?</b>
+    <blockquote>
+    Go to "My devices" and press "Add devices". Select the number you need and pay.
+    </blockquote>
+
+    <b>Connection issues?</b>
+    <blockquote>
+    Check that your subscription is active and not expired. Try a different server from the "Servers" list. If that doesn't help — contact support.
+    </blockquote>
+
+    <b>Support:</b> press the "Support" button in the main menu.
+
+# Subscription
+msg-subscription-main =
+    <b>💳 Subscription</b>
+    { $has_subscription ->
+        [1]
+    <blockquote>
+    • <b>Plan</b>: { $plan }
+    • <b>Traffic limit</b>: { $traffic_limit }
+    • <b>Device limit</b>: { $device_limit }
+    • <b>Remaining</b>: { $expire_time }
+    </blockquote>
+        *[0] { empty }
+    }
+msg-subscription-plans = <b>📦 Select a plan</b>
+msg-subscription-add-devices =
+    <b>➕ Add devices</b>
+
+    Select the number of devices to add — press one of the buttons below.
+
+msg-subscription-add-devices-empty =
+    <b>➕ Add devices</b>
+
+    Adding devices is currently unavailable. Please contact support.
+
+msg-subscription-promocode =
+    <b>🎟 Promocode activation</b>
+
+    Enter your promocode in the message below. The discount will be applied to your next purchases.
 
 msg-subscription-details =
     <b>{ $plan }:</b>
@@ -157,7 +270,13 @@ msg-subscription-confirm =
     *[OTHER] { empty }
     }
 
-msg-subscription-new-success = To start using our service, click <code>`{ btn-subscription-connect }`</code> and follow the instructions!
+msg-subscription-new-success = 
+    To get started with our service:
+    <blockquote>
+    1️⃣ Press the <code>`{ btn-subscription-connect }`</code> button above
+    2️⃣ Download the app (V2Ray, Clash, Nekoray, etc.) — links in our channel
+    3️⃣ Import the configuration or scan the QR code from the opened page
+    </blockquote>
 msg-subscription-renew-success = Your subscription has been renewed for { $added_duration }.
 msg-subscription-trial =
     <b>✅ Trial subscription received!</b>

@@ -29,7 +29,7 @@ from src.core.enums import (
     UserNotificationType,
     UserRole,
 )
-from src.core.i18n.translator import get_translated_kwargs
+from src.core.i18n.translator import get_translated_kwargs, normalize_locale_for_hub
 from src.core.utils.formatters import i18n_postprocess_text
 from src.core.utils.message_payload import MessagePayload
 from src.core.utils.types import AnyKeyboard
@@ -277,7 +277,9 @@ class NotificationService(BaseService):
         return reply_markup
 
     def _get_close_notification_button(self, locale: Locale) -> InlineKeyboardButton:
-        i18n = self.translator_hub.get_translator_by_locale(locale=locale)
+        i18n = self.translator_hub.get_translator_by_locale(
+            locale=normalize_locale_for_hub(locale)
+        )
         button_text = i18n.get("btn-notification-close")
         return InlineKeyboardButton(text=button_text, callback_data=Notification.CLOSE.state)
 
@@ -313,7 +315,9 @@ class NotificationService(BaseService):
         if not i18n_key:
             return i18n_key
 
-        i18n = self.translator_hub.get_translator_by_locale(locale=locale)
+        i18n = self.translator_hub.get_translator_by_locale(
+            locale=normalize_locale_for_hub(locale)
+        )
         kwargs = get_translated_kwargs(i18n, i18n_kwargs)
         return i18n_postprocess_text(i18n.get(i18n_key, **kwargs))
 

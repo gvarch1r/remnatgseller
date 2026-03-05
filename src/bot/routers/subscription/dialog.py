@@ -1,4 +1,5 @@
 from aiogram_dialog import Dialog, Window
+from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Column, Group, Row, Select, SwitchTo, Url
 from aiogram_dialog.widgets.text import Format
 from magic_filter import F
@@ -26,6 +27,7 @@ from .handlers import (
     on_get_subscription,
     on_payment_method_select,
     on_plan_select,
+    on_promocode_input,
     on_subscription_plans,
 )
 
@@ -58,14 +60,14 @@ subscription = Window(
             when=F["has_active_subscription"] & F["has_devices_limit"],
         ),
     ),
-    # Row(
-    #     Button(
-    #         text=I18nFormat("btn-subscription-promocode"),
-    #         id=f"{PURCHASE_PREFIX}promocode",
-    #         on_click=show_dev_popup,
-    #         # state=Subscription.PROMOCODE,
-    #     ),
-    # ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-subscription-promocode"),
+            id="promocode",
+            state=Subscription.PROMOCODE,
+            when=F["promocode_enabled"],
+        ),
+    ),
     *back_main_menu_button,
     IgnoreUpdate(),
     state=Subscription.MAIN,
@@ -135,7 +137,8 @@ duration = Window(
 
 device_addons = Window(
     Banner(BannerName.SUBSCRIPTION),
-    I18nFormat("msg-subscription-add-devices"),
+    I18nFormat("msg-subscription-add-devices", when=~F["addons_empty"]),
+    I18nFormat("msg-subscription-add-devices-empty", when=F["addons_empty"]),
     Group(
         Select(
             text=I18nFormat(
@@ -153,6 +156,7 @@ device_addons = Window(
             on_click=on_device_addon_select,
         ),
         width=2,
+        when=~F["addons_empty"],
     ),
     Row(
         SwitchTo(
@@ -280,8 +284,25 @@ failed = Window(
     state=Subscription.FAILED,
 )
 
+promocode = Window(
+    Banner(BannerName.SUBSCRIPTION),
+    I18nFormat("msg-subscription-promocode"),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=Subscription.MAIN,
+        ),
+    ),
+    *back_main_menu_button,
+    MessageInput(func=on_promocode_input),
+    IgnoreUpdate(),
+    state=Subscription.PROMOCODE,
+)
+
 router = Dialog(
     subscription,
+    promocode,
     plans,
     device_addons,
     duration,

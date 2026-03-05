@@ -27,9 +27,23 @@ empty = { "!empty!" }
 # Headers
 hdr-user = <b>👤 User:</b>
 hdr-user-profile = <b>👤 Profile:</b>
+hdr-subscription = { $is_trial ->
+    [1] <b>🎁 Trial subscription:</b>
+    *[0] <b>💳 Subscription:</b>
+    }
 hdr-error = <b>⚠️ Error:</b>
 
 # Fragments
+frg-user =
+    <blockquote>
+    • <b>ID</b>: <code>{ $user_id }</code>
+    • <b>Name</b>: { $user_name }
+    { $personal_discount ->
+    [0] { empty }
+    *[HAS] • <b>Your discount</b>: { $personal_discount }%
+    }
+    </blockquote>
+
 frg-user-info =
     <blockquote>
     • <b>ID</b>: <code>{ $user_id }</code>

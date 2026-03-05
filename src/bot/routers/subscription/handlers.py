@@ -1,9 +1,10 @@
 import traceback
 from typing import Optional, TypedDict, cast
 
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.formatting import Text
 from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
@@ -27,6 +28,7 @@ from src.services.notification import NotificationService
 from src.services.payment_gateway import PaymentGatewayService
 from src.services.plan import PlanService
 from src.services.pricing import PricingService
+from src.services.promocode import PromocodeService
 from src.services.settings import SettingsService
 from src.services.subscription import SubscriptionService
 
@@ -606,6 +608,33 @@ async def on_payment_method_select(
             user=user,
             payload=MessagePayload(i18n_key="ntf-subscription-payment-creation-failed"),
         )
+
+
+@inject
+async def on_promocode_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    promocode_service: FromDishka[PromocodeService],
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    code = message.text.strip() if message.text else ""
+
+    success, i18n_key, i18n_kwargs = await promocode_service.activate_for_user(
+        code, user
+    )
+
+    await notification_service.notify_user(
+        user=user,
+        payload=MessagePayload(
+            i18n_key=i18n_key,
+            i18n_kwargs=i18n_kwargs or {},
+        ),
+    )
+
+    if success:
+        await dialog_manager.switch_to(state=Subscription.MAIN)
 
 
 @inject

@@ -33,16 +33,26 @@ async def subscription_getter(
     user: UserDto,
     **kwargs: Any,
 ) -> dict[str, Any]:
-    has_active = bool(user.current_subscription and not user.current_subscription.is_trial)
-    is_unlimited = user.current_subscription.is_unlimited if user.current_subscription else False
-    has_devices_limit = (
-        user.current_subscription.has_devices_limit if user.current_subscription else False
-    )
-    return {
+    sub = user.current_subscription
+    has_active = bool(sub and not sub.is_trial)
+    is_unlimited = sub.is_unlimited if sub else False
+    has_devices_limit = sub.has_devices_limit if sub else False
+
+    result: dict[str, Any] = {
         "has_active_subscription": has_active,
         "is_not_unlimited": not is_unlimited,
         "has_devices_limit": has_devices_limit,
+        "has_subscription": 1 if (sub and (sub.is_trial or has_active)) else 0,
+        "promocode_enabled": True,
     }
+
+    if sub:
+        result["plan"] = sub.plan.name if sub.plan else "—"
+        result["traffic_limit"] = i18n_format_traffic_limit(sub.traffic_limit)
+        result["device_limit"] = i18n_format_device_limit(sub.device_limit)
+        result["expire_time"] = i18n_format_expire_time(sub.expire_at)
+
+    return result
 
 
 @inject
@@ -77,7 +87,10 @@ async def device_addons_getter(
                 "currency": currency.symbol,
             }
         )
-    return {"device_addons": formatted}
+    return {
+        "device_addons": formatted,
+        "addons_empty": len(formatted) == 0,
+    }
 
 
 @inject

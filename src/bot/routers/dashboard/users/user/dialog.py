@@ -193,8 +193,11 @@ audit = Window(
     ScrollingGroup(
         ListGroup(
             Row(
-                Format("{item[created_at]} — {item[action]}: {item[details]}"),
-                id="audit_item",
+                Button(
+                    text=Format("{item[created_at]} — {item[action]}: {item[details]}"),
+                    id="audit_item",
+                    on_click=lambda *a, **k: None,
+                ),
             ),
             id="audit_list",
             item_id_getter=lambda item: item["id"],

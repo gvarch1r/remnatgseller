@@ -12,7 +12,7 @@ from magic_filter import MagicFilter
 
 from src.core.config import AppConfig
 from src.core.constants import CONTAINER_KEY
-from src.core.i18n.translator import get_translated_kwargs
+from src.core.i18n.translator import get_translated_kwargs, normalize_locale_for_hub
 from src.core.utils.formatters import i18n_postprocess_text
 
 
@@ -65,7 +65,9 @@ class I18nFormat(Text):
             return i18n_postprocess_text(text=i18n.get(key, **data))
         except KeyNotFoundError:
             try:
-                fallback = hub.get_translator_by_locale(locale=config.default_locale)
+                fallback = hub.get_translator_by_locale(
+                    locale=normalize_locale_for_hub(config.default_locale)
+                )
                 data = get_translated_kwargs(fallback, data)
                 key = self.key.format_map(data)
                 return i18n_postprocess_text(text=fallback.get(key, **data))

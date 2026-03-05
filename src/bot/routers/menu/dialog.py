@@ -21,7 +21,13 @@ from src.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from src.core.constants import MIDDLEWARE_DATA_KEY, PURCHASE_PREFIX, USER_KEY
 from src.core.enums import BannerName
 
-from .getters import devices_getter, invite_about_getter, invite_getter, menu_getter
+from .getters import (
+    devices_getter,
+    invite_about_getter,
+    invite_getter,
+    locations_getter,
+    menu_getter,
+)
 from .handlers import (
     on_device_delete,
     on_get_trial,
@@ -63,6 +69,16 @@ menu = Window(
             text=I18nFormat("btn-menu-subscription"),
             id=f"{PURCHASE_PREFIX}subscription",
             state=Subscription.MAIN,
+        ),
+        SwitchTo(
+            text=I18nFormat("btn-menu-locations"),
+            id="locations",
+            state=MainMenu.LOCATIONS,
+        ),
+        SwitchTo(
+            text=I18nFormat("btn-menu-help"),
+            id="help",
+            state=MainMenu.HELP,
         ),
     ),
     Row(
@@ -222,9 +238,28 @@ invite_about = Window(
     getter=invite_about_getter,
 )
 
+locations = Window(
+    Banner(BannerName.MENU),
+    I18nFormat("msg-locations-main", when=~F["locations_empty"]),
+    I18nFormat("msg-locations-empty", when=F["locations_empty"]),
+    Format("{locations_text}", when=~F["locations_empty"]),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=MainMenu.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=MainMenu.LOCATIONS,
+    getter=locations_getter,
+)
+
 router = Dialog(
     menu,
     devices,
     invite,
     invite_about,
+    locations,
+    help_window,
 )

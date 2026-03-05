@@ -185,3 +185,30 @@ async def invite_about_getter(
         "identical_reward": identical_reward,
         "max_level": max_level,
     }
+
+
+@inject
+async def locations_getter(
+    dialog_manager: DialogManager,
+    remnawave_service: FromDishka[RemnawaveService],
+    i18n: FromDishka[TranslatorRunner],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    locations = await remnawave_service.get_locations_list()
+    items = [
+        {"country": loc["country"], "name": loc["name"]}
+        for loc in locations
+    ]
+    locations_text = (
+        "\n".join(
+            i18n.get("msg-locations-item", country=loc["country"], name=loc["name"])
+            for loc in locations
+        )
+        if items
+        else ""
+    )
+    return {
+        "locations": items,
+        "locations_text": locations_text,
+        "locations_empty": len(items) == 0,
+    }

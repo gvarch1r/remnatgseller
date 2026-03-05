@@ -1,6 +1,13 @@
-from typing import Any
+from typing import Any, Union
 
 from fluentogram import TranslatorRunner
+
+
+def normalize_locale_for_hub(locale: Union[str, None]) -> str:
+    """Convert locale to lowercase for TranslatorHub (matches en/, ru/ folder names)."""
+    if locale is None:
+        return "en"
+    return locale.lower() if isinstance(locale, str) else str(locale).lower()
 
 
 def get_translated_kwargs(i18n: TranslatorRunner, kwargs: dict[str, Any]) -> dict[str, Any]:

@@ -9,6 +9,7 @@ from redis.asyncio import Redis
 
 from src.bot.keyboards import get_user_keyboard
 from src.core.config import AppConfig
+from src.core.i18n.translator import normalize_locale_for_hub
 from src.core.enums import (
     AuditActionType,
     Currency,
@@ -235,21 +236,30 @@ class PaymentGatewayService(BaseService):
     ) -> PaymentResult:
         gateway_instance = await self._get_gateway_instance(gateway_type)
 
-        i18n = self.translator_hub.get_translator_by_locale(locale=user.language)
+        i18n = self.translator_hub.get_translator_by_locale(
+            locale=normalize_locale_for_hub(user.language)
+        )
         if purchase_type == PurchaseType.ADD_DEVICES:
-            details = i18n.get(
-                "payment-invoice-description-add-devices",
-                purchase_type=purchase_type,
-                name=plan.name,
-            )
+            try:
+                details = i18n.get(
+                    "payment-invoice-description-add-devices",
+                    purchase_type=purchase_type.value,
+                    name=plan.name,
+                )
+            except Exception:
+                details = f"Add devices: {plan.name}"
         else:
             key, kw = i18n_format_days(plan.duration)
-            details = i18n.get(
-                "payment-invoice-description",
-                purchase_type=purchase_type,
-                name=plan.name,
-                duration=i18n.get(key, **kw),
-            )
+            try:
+                duration_str = i18n.get(key, **kw)
+                details = i18n.get(
+                    "payment-invoice-description",
+                    purchase_type=purchase_type.value,
+                    name=plan.name,
+                    duration=duration_str,
+                )
+            except Exception:
+                details = f"{plan.name}"
 
         transaction_data = {
             "status": TransactionStatus.PENDING,
@@ -286,7 +296,9 @@ class PaymentGatewayService(BaseService):
         gateway_type: PaymentGatewayType,
     ) -> PaymentResult:
         gateway_instance = await self._get_gateway_instance(gateway_type)
-        i18n = self.translator_hub.get_translator_by_locale(locale=user.language)
+        i18n = self.translator_hub.get_translator_by_locale(
+            locale=normalize_locale_for_hub(user.language)
+        )
         test_details = i18n.get("test-payment")
 
         test_pricing = PriceDetailsDto(original_amount=2)

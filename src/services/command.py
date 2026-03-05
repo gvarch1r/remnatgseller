@@ -4,6 +4,7 @@ from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 from loguru import logger
 
 from src.core.enums import Command, Locale
+from src.core.i18n.translator import normalize_locale_for_hub
 
 from .base import BaseService
 
@@ -19,7 +20,9 @@ class CommandService(BaseService):
         for language_code in locales_to_set:
             display_language_code = language_code if language_code else "default"
             i18n = self.translator_hub.get_translator_by_locale(
-                locale=language_code or self.config.default_locale
+                locale=normalize_locale_for_hub(
+                    language_code or self.config.default_locale
+                )
             )
 
             commands_for_locale = [

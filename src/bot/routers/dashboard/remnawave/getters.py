@@ -9,7 +9,7 @@ from fluentogram.exceptions import KeyNotFoundError
 from remnapy import RemnawaveSDK
 
 from src.core.config import AppConfig
-from src.core.i18n.translator import get_translated_kwargs
+from src.core.i18n.translator import get_translated_kwargs, normalize_locale_for_hub
 from src.core.utils.formatters import (
     format_country_code,
     format_percent,
@@ -56,7 +56,9 @@ async def system_getter(
         main_text = i18n.get("msg-remnawave-main", **data)
     except KeyNotFoundError:
         try:
-            fallback = hub.get_translator_by_locale(locale=app_config.default_locale)
+            fallback = hub.get_translator_by_locale(
+                locale=normalize_locale_for_hub(app_config.default_locale)
+            )
             data = get_translated_kwargs(fallback, data)
             main_text = fallback.get("msg-remnawave-main", **data)
         except KeyNotFoundError:

@@ -1,7 +1,9 @@
 from typing import Any, Optional
 
+from sqlalchemy import func, select
+
 from src.core.enums import PromocodeRewardType
-from src.infrastructure.database.models.sql import Promocode
+from src.infrastructure.database.models.sql import Promocode, PromocodeActivation
 
 from .base import BaseRepository
 
@@ -37,3 +39,25 @@ class PromocodeRepository(BaseRepository):
 
     async def filter_active(self, is_active: bool) -> list[Promocode]:
         return await self._get_many(Promocode, Promocode.is_active == is_active)
+
+    async def count_activations(self, promocode_id: int) -> int:
+        stmt = select(func.count()).select_from(PromocodeActivation).where(
+            PromocodeActivation.promocode_id == promocode_id
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar() or 0
+
+    async def has_user_activated(self, user_telegram_id: int, promocode_id: int) -> bool:
+        stmt = select(PromocodeActivation).where(
+            PromocodeActivation.user_telegram_id == user_telegram_id,
+            PromocodeActivation.promocode_id == promocode_id,
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    async def create_activation(self, promocode_id: int, user_telegram_id: int) -> PromocodeActivation:
+        activation = PromocodeActivation(
+            promocode_id=promocode_id,
+            user_telegram_id=user_telegram_id,
+        )
+        return await self.create_instance(activation)

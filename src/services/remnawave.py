@@ -269,6 +269,31 @@ class RemnawaveService(BaseService):
         logger.info(f"No devices found for RemnaUser '{user.telegram_id}'")
         return []
 
+    async def get_locations_list(self) -> list[dict[str, str]]:
+        """Return list of server locations (nodes) for display to users."""
+        try:
+            result = await self.remnawave.nodes.get_all_nodes()
+        except Exception as exc:
+            logger.warning(f"Failed to fetch nodes for locations: {exc}")
+            return []
+
+        locations = []
+        seen = set()
+        for node in result:
+            if not node.is_connected or node.is_disabled:
+                continue
+            key = (node.country_code, node.name)
+            if key in seen:
+                continue
+            seen.add(key)
+            locations.append(
+                {
+                    "country": format_country_code(node.country_code),
+                    "name": node.name,
+                }
+            )
+        return sorted(locations, key=lambda x: (x["name"], x["country"]))
+
     async def delete_device(self, user: UserDto, hwid: str) -> Optional[int]:
         logger.info(f"Deleting device '{hwid}' for RemnaUser '{user.telegram_id}'")
 

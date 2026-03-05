@@ -1,5 +1,9 @@
 # Back
 btn-back = ⬅️ Back
+
+# Menu
+btn-menu-locations = 🌍 Servers
+btn-menu-help = ❓ Help
 btn-user-audit = 📋 Audit
 
 # Subscription
