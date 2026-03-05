@@ -195,11 +195,12 @@ async def help_getter(**kwargs: Any) -> dict[str, Any]:
 @inject
 async def locations_getter(
     dialog_manager: DialogManager,
+    user: UserDto,
     remnawave_service: FromDishka[RemnawaveService],
     i18n: FromDishka[TranslatorRunner],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    locations = await remnawave_service.get_locations_list()
+    locations = await remnawave_service.get_locations_for_user(user)
     items = [
         {"country": loc["country"], "name": loc["name"]}
         for loc in locations

@@ -1,3 +1,26 @@
+# Device addons
+msg-device-addons-main = <b>📱 Device add-ons</b>
+
+    Add-on options for users. Prices per currency.
+
+msg-device-addons-add = <b>🆕 New option</b>
+
+    Enter number of devices (1–10):
+
+msg-device-addons-edit = <b>📱 Edit: +{ $device_count } devices</b>
+
+msg-device-addons-device-count-hint = Enter new device count (1–10):
+
+msg-device-addons-prices = <b>💰 Prices by currency</b>
+
+    Select currency to edit price:
+
+msg-device-addons-price = <b>💰 Price ({ $currency })</b>
+
+    Current: { $current_price }
+
+    Enter new price:
+
 # RemnatgSeller
 ntf-remnatgseller-info = 
     <b>💎 RemnatgSeller v{ $version }</b>

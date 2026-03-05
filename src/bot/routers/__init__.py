@@ -48,6 +48,7 @@ def setup_routers(router: Router) -> None:
         promocodes.dialog.router,
         #
         remnatgseller.dialog.router,
+        remnatgseller.device_addons.dialog.router,
         remnatgseller.gateways.dialog.router,
         remnatgseller.referral.dialog.router,
         remnatgseller.notifications.dialog.router,

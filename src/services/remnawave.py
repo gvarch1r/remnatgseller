@@ -270,40 +270,54 @@ class RemnawaveService(BaseService):
         return []
 
     async def get_locations_list(self) -> list[dict[str, str]]:
-        """Return list of server locations (nodes) for display to users."""
+        """Return list of all server locations (nodes) from panel. Use get_locations_for_user for user-specific list."""
+        nodes = await self._fetch_all_nodes()
+        return self._nodes_to_locations(nodes)
+
+    async def get_locations_for_user(self, user: UserDto) -> list[dict[str, str]]:
+        """Return list of server locations accessible to the user (from their subscription)."""
+        if user.current_subscription:
+            try:
+                result = await self.remnawave.users.get_user_accessible_nodes(
+                    user.current_subscription.user_remna_id
+                )
+                nodes = result.nodes if result else []
+                return self._nodes_to_locations(nodes)
+            except Exception as exc:
+                logger.warning(
+                    f"Failed to fetch accessible nodes for user {user.telegram_id}: {exc}, falling back to all nodes"
+                )
+        nodes = await self._fetch_all_nodes()
+        return self._nodes_to_locations(nodes)
+
+    async def _fetch_all_nodes(self) -> list:
         try:
             result = await self.remnawave.nodes.get_all_nodes()
         except Exception as exc:
             logger.warning(f"Failed to fetch nodes for locations: {exc}")
             return []
+        nodes = getattr(result, "root", result) if result else []
+        return list(nodes) if isinstance(nodes, (list, tuple)) else []
 
-        nodes_count = len(result)
-        if nodes_count == 0:
-            logger.warning("get_locations_list: API returned 0 nodes")
-            return []
-
+    def _nodes_to_locations(self, nodes: list) -> list[dict[str, str]]:
+        """Convert nodes to locations list (country, name)."""
         locations = []
-        seen = set()
-        skipped = 0
-        for node in result:
-            # Показываем все ноды; панель может отдавать is_connected иначе
-            if node.is_disabled:
-                skipped += 1
-                continue
-            key = (node.country_code, node.name)
+        seen: set[tuple[str, str]] = set()
+        for node in nodes:
+            country = getattr(node, "country_code", None) or getattr(node, "countryCode", "")
+            name = getattr(node, "name", "") or ""
+            key = (country, name)
             if key in seen:
                 continue
             seen.add(key)
             locations.append(
                 {
-                    "country": format_country_code(node.country_code),
-                    "name": node.name,
+                    "country": format_country_code(country),
+                    "name": name,
                 }
             )
-        if skipped and not locations:
-            logger.warning(
-                f"get_locations_list: all {nodes_count} nodes skipped (is_disabled=True)"
-            )
+        if not locations and nodes:
+            logger.warning(f"get_locations: {len(nodes)} nodes from API, 0 after dedup")
         return sorted(locations, key=lambda x: (x["name"], x["country"]))
 
     async def delete_device(self, user: UserDto, hwid: str) -> Optional[int]:

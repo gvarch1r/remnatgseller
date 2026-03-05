@@ -33,3 +33,13 @@ btn-remnawave-users = 👥 Users
 btn-remnawave-hosts = 🌐 Hosts
 btn-remnawave-nodes = 🖥️ Nodes
 btn-remnawave-inbounds = 🔌 Inbounds
+
+# RemnatgSeller
+btn-remnatgseller-device-addons = 📱 Device add-ons
+
+# Device addons
+btn-device-addons-create = 🆕 Add option
+btn-device-addon-active = { $is_active ->
+    [1] 🟢 Enabled
+    *[0] 🔴 Disabled
+    }

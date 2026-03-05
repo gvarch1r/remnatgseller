@@ -831,6 +831,29 @@ msg-referral-reward =
         *[OTHER] { $reward_strategy_type }
     } (в формате: уровень=значение)
 
+# Device addons
+msg-device-addons-main = <b>📱 Докупка устройств</b>
+
+    Опции докупки для пользователей. Цены по валютам.
+
+msg-device-addons-add = <b>🆕 Новая опция</b>
+
+    Введите количество устройств (1–10):
+
+msg-device-addons-edit = <b>📱 Редактирование: +{ $device_count } устройств</b>
+
+msg-device-addons-device-count-hint = Введите новое количество устройств (1–10):
+
+msg-device-addons-prices = <b>💰 Цены по валютам</b>
+
+    Выберите валюту для изменения цены:
+
+msg-device-addons-price = <b>💰 Цена ({ $currency })</b>
+
+    Текущая: { $current_price }
+
+    Введите новую цену:
+
 # Plans
 msg-plans-main = <b>📦 Планы</b>
 

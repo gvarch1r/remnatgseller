@@ -131,6 +131,13 @@ class RemnatgsellerNotifications(StatesGroup):
     SYSTEM = State()
 
 
+class RemnatgsellerDeviceAddons(StatesGroup):
+    MAIN = State()
+    EDIT = State()
+    ADD = State()
+    PRICE = State()
+
+
 class RemnatgsellerPlans(StatesGroup):
     MAIN = State()
     CONFIGURATOR = State()

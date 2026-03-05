@@ -9,6 +9,7 @@ from src.bot.states import (
     Dashboard,
     DashboardRemnatgseller,
     DashboardUsers,
+    RemnatgsellerDeviceAddons,
     RemnatgsellerGateways,
     RemnatgsellerNotifications,
     RemnatgsellerPlans,
@@ -57,6 +58,14 @@ remnatgseller = Window(
             state=RemnatgsellerPlans.MAIN,
             mode=StartMode.RESET_STACK,
         ),
+        Start(
+            text=I18nFormat("btn-remnatgseller-device-addons"),
+            id="device_addons",
+            state=RemnatgsellerDeviceAddons.MAIN,
+            mode=StartMode.RESET_STACK,
+        ),
+    ),
+    Row(
         Start(
             text=I18nFormat("btn-remnatgseller-notifications"),
             id="notifications",

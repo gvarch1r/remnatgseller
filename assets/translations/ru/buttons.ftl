@@ -226,6 +226,7 @@ btn-remnatgseller-gateways = 🌐 Платежные системы
 btn-remnatgseller-referral = 👥 Реф. система
 btn-remnatgseller-advertising = 🎯 Реклама
 btn-remnatgseller-plans = 📦 Планы
+btn-remnatgseller-device-addons = 📱 Докупка устройств
 btn-remnatgseller-notifications = 🔔 Уведомления
 btn-remnatgseller-logs = 📄 Логи
 btn-remnatgseller-audit = 🔍 Аудит
@@ -244,6 +245,13 @@ btn-gateway-active = { $is_active ->
 btn-gateway-test = 🐞 Тест
 btn-gateways-default-currency = 💸 Валюта по умолчанию
 btn-gateways-placement = 🔢 Изменить позиционирование
+
+# Device addons
+btn-device-addons-create = 🆕 Добавить опцию
+btn-device-addon-active = { $is_active ->
+    [1] 🟢 Включено
+    *[0] 🔴 Выключено
+    }
 
 btn-gateways-default-currency-choice = { $enabled -> 
     [1] 🔘
