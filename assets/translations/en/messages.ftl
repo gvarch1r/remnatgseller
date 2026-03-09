@@ -186,18 +186,6 @@ msg-menu-devices =
     
     <i>To add devices — press the "Add devices" button below.</i>
 
-msg-locations-main =
-    <b>🌍 Servers</b>
-
-    Available locations for connection:
-
-msg-locations-empty =
-    <b>🌍 Servers</b>
-
-    Server list is temporarily unavailable. Please contact support.
-
-msg-locations-item = { $country } { $name }
-
 msg-help-main =
     <b>❓ Help & FAQ</b>
 
@@ -213,7 +201,7 @@ msg-help-main =
 
     <b>Connection issues?</b>
     <blockquote>
-    Check that your subscription is active and not expired. Try a different server from the "Servers" list. If that doesn't help — contact support.
+    Check that your subscription is active and not expired. Try a different server in the app. If that doesn't help — contact support.
     </blockquote>
 
     <b>Support:</b> press the "Support" button in the main menu.

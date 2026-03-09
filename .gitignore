@@ -24,6 +24,17 @@ __pycache__/
 .pytest_cache/
 .coverage/
 
+# Private banners — не коммитить, копировать на сервер вручную
+assets/banners/ru/*.png
+assets/banners/ru/*.jpg
+assets/banners/ru/*.webp
+assets/banners/en/*.png
+assets/banners/en/*.jpg
+assets/banners/en/*.webp
+assets/banners/*.png
+assets/banners/*.jpg
+!assets/banners/default.png
+
 # Build
 build/
 _build/

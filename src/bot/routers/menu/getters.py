@@ -190,31 +190,3 @@ async def invite_about_getter(
 @inject
 async def help_getter(**kwargs: Any) -> dict[str, Any]:
     return {}
-
-
-@inject
-async def locations_getter(
-    dialog_manager: DialogManager,
-    user: UserDto,
-    remnawave_service: FromDishka[RemnawaveService],
-    i18n: FromDishka[TranslatorRunner],
-    **kwargs: Any,
-) -> dict[str, Any]:
-    locations = await remnawave_service.get_locations_for_user(user)
-    items = [
-        {"country": loc["country"], "name": loc["name"]}
-        for loc in locations
-    ]
-    locations_text = (
-        "\n".join(
-            i18n.get("msg-locations-item", country=loc["country"], name=loc["name"])
-            for loc in locations
-        )
-        if items
-        else ""
-    )
-    return {
-        "locations": items,
-        "locations_text": locations_text,
-        "locations_empty": len(items) == 0,
-    }

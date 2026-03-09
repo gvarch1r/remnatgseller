@@ -42,6 +42,8 @@ Banner filenames must correspond to the following predefined names, specified in
 * **`DASHBOARD`**: The dashboard banner.
 * **`SUBSCRIPTION`**: The subscription banner.
 * **`REFERRAL`**: The referral banner.
+* **`DEVICES`**: The devices section banner.
+* **`ABOUT_US`**: The about us / help section banner.
 
 ## Example file structure
 

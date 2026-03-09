@@ -48,8 +48,15 @@ docker build -t remnatgseller:local .
 | `DATABASE_PASSWORD` | Пароль БД |
 | `REDIS_PASSWORD` | Пароль Redis |
 
-**Баннеры:** Пока дизайнер не готов — `BOT_USE_BANNERS=false`.  
-Когда появятся баннеры — положить в `./assets/banners/` и `BOT_USE_BANNERS=true`.
+**Баннеры:** Баннеры не хранятся в репозитории (см. `.gitignore`). Скопируйте свои файлы на сервер:
+```bash
+# С локальной машины (пример для scp)
+scp -r assets/banners/ru/*.png user@server:/opt/remnatgseller/assets/banners/ru/
+scp -r assets/banners/en/*.png user@server:/opt/remnatgseller/assets/banners/en/
+scp assets/banners/default.png user@server:/opt/remnatgseller/assets/banners/
+```
+Имена файлов: `menu.png`, `dashboard.png`, `subscription.png`, `referral.png`, `devices.png`, `about_us.png`, `default.png`.  
+Затем `BOT_USE_BANNERS=true`.
 
 ## 4. Сеть Docker
 
@@ -110,4 +117,4 @@ docker compose down
 docker compose up -d
 ```
 
-С `RESET_ASSETS=true` — перезаписать assets из образа (осторожно, перезатрёт кастомные переводы и баннеры).
+С `RESET_ASSETS=true` — перезаписать assets из образа (осторожно, перезатрёт кастомные переводы и баннеры). **Не использовать**, если баннеры хранятся только на сервере.

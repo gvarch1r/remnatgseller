@@ -26,7 +26,6 @@ from .getters import (
     help_getter,
     invite_about_getter,
     invite_getter,
-    locations_getter,
     menu_getter,
 )
 from .handlers import (
@@ -72,11 +71,6 @@ menu = Window(
             state=Subscription.MAIN,
         ),
         SwitchTo(
-            text=I18nFormat("btn-menu-locations"),
-            id="locations",
-            state=MainMenu.LOCATIONS,
-        ),
-        SwitchTo(
             text=I18nFormat("btn-menu-help"),
             id="help",
             state=MainMenu.HELP,
@@ -120,7 +114,7 @@ menu = Window(
 )
 
 devices = Window(
-    Banner(BannerName.MENU),
+    Banner(BannerName.DEVICES),
     I18nFormat("msg-menu-devices"),
     Row(
         Button(
@@ -239,25 +233,8 @@ invite_about = Window(
     getter=invite_about_getter,
 )
 
-locations = Window(
-    Banner(BannerName.MENU),
-    I18nFormat("msg-locations-main", when=~F["locations_empty"]),
-    I18nFormat("msg-locations-empty", when=F["locations_empty"]),
-    Format("{locations_text}", when=~F["locations_empty"]),
-    Row(
-        SwitchTo(
-            text=I18nFormat("btn-back"),
-            id="back",
-            state=MainMenu.MAIN,
-        ),
-    ),
-    IgnoreUpdate(),
-    state=MainMenu.LOCATIONS,
-    getter=locations_getter,
-)
-
 help_window = Window(
-    Banner(BannerName.MENU),
+    Banner(BannerName.ABOUT_US),
     I18nFormat("msg-help-main"),
     Row(
         SwitchTo(
@@ -276,6 +253,5 @@ router = Dialog(
     devices,
     invite,
     invite_about,
-    locations,
     help_window,
 )

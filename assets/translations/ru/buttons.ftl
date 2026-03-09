@@ -41,7 +41,6 @@ btn-menu-trial = 🎁 ПОПРОБОВАТЬ БЕСПЛАТНО
 btn-menu-devices = 📱 Мои устройства
 btn-menu-devices-empty = ⚠️ Нет привязанных устройств
 btn-menu-subscription = 💳 Подписка
-btn-menu-locations = 🌍 Серверы
 btn-menu-help = ❓ Помощь
 btn-menu-invite = 👥 Пригласить
 btn-menu-invite-about = ❓ Подробнее о награде
