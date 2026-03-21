@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 from datetime import datetime, timedelta
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from src.core.enums import PromocodeAvailability, PromocodeRewardType
 from src.core.utils.time import datetime_now
@@ -37,13 +37,24 @@ class PromocodeDto(TrackableDto):
     created_at: Optional[datetime] = Field(default=None, frozen=True)
     updated_at: Optional[datetime] = Field(default=None, frozen=True)
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_db_nulls(cls, data: object) -> object:
+        """DB stores unlimited lifetime/activations as NULL; UI uses -1."""
+        if isinstance(data, dict):
+            if data.get("lifetime") is None:
+                data["lifetime"] = -1
+            if data.get("max_activations") is None:
+                data["max_activations"] = -1
+        return data
+
     @property
     def is_unlimited(self) -> bool:
-        return self.max_activations is None
+        return self.max_activations is None or self.max_activations < 0
 
     @property
     def is_depleted(self) -> bool:
-        if self.max_activations is None:
+        if self.max_activations is None or self.max_activations < 0:
             return False
 
         return len(self.activations) >= self.max_activations
@@ -54,7 +65,8 @@ class PromocodeDto(TrackableDto):
 
     @property
     def expires_at(self) -> Optional[datetime]:
-        if self.lifetime is not None and self.created_at is not None:
+        # -1 (and any negative) = no expiry; matches DB NULL -> normalized to -1
+        if self.lifetime is not None and self.lifetime >= 0 and self.created_at is not None:
             return self.created_at + timedelta(days=self.lifetime)
         return None
 
