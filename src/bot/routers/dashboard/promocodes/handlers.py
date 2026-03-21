@@ -302,3 +302,36 @@ async def on_promocode_lifetime_input(
     promocode.lifetime = value
     adapter.save(promocode)
     await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+@inject
+async def on_promocode_max_activations_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    raw = message.text.strip() if message.text else ""
+
+    if not raw or not raw.lstrip("-").isdigit():
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-activations-invalid"),
+        )
+        return
+
+    value = int(raw)
+    if value < -1:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-activations-invalid"),
+        )
+        return
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.max_activations = value
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)

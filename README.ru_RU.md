@@ -105,6 +105,6 @@ cd /opt/remnatgseller && docker compose pull && docker compose down && RESET_ASS
 
 ## Кастомизация
 
-**Баннеры:** `/opt/remnatgseller/assets/banners/(locale)/` — форматы: jpg, png, gif, webp. Файл `default.jpg` не удалять.
+**Баннеры:** `/opt/remnatgseller/assets/banners/(locale)/` — папка локали **строчными буквами** (`en`, `ru`). Имена файлов **строчными**, как экран: `menu`, `dashboard`, `subscription`, `promocode`, `referral`, `devices`, `about_us`, плюс `default` (запасной). Форматы: jpg, png, gif, webp. Не удаляйте `default.jpg` (или `default.png`). Варианты вроде `MENU.jpg` по-прежнему подхватываются как запасной вариант.
 
 **Переводы:** `/opt/remnatgseller/assets/translations/(locale)/` — правки и перезапуск контейнера.

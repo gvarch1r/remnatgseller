@@ -480,3 +480,4 @@ ntf-promocode-unsupported-type = <i>❌ Этот тип промокода не 
 ntf-promocode-reward-invalid-number = <i>❌ Введите положительное целое число.</i>
 ntf-promocode-reward-invalid-percent = <i>❌ Процент скидки должен быть от 1 до 100.</i>
 ntf-promocode-lifetime-invalid = <i>❌ Укажите целое число дней или -1 для бессрочного.</i>
+ntf-promocode-activations-invalid = <i>❌ Укажите целое число ≥ 0 или -1 для безлимита.</i>

@@ -15,6 +15,50 @@ from src.core.enums import BannerFormat, BannerName, Locale
 from src.infrastructure.database.models.dto import UserDto
 
 
+def _locale_banner_subdirs(banners_dir: Path, loc: Locale) -> list[Path]:
+    """Try lowercase first (ru/en — как в translations), then original casing (RU/EN)."""
+    raw = str(loc)
+    lowered = raw.lower()
+    out: list[Path] = []
+    for sub in (lowered, raw):
+        candidate = banners_dir / sub
+        if candidate.is_dir() and candidate not in out:
+            out.append(candidate)
+    return out
+
+
+def _banner_filename_patterns(name: BannerName) -> list[str]:
+    """Имена файлов в нижнем регистре (menu.jpg, about_us.png); затем вариант как в enum — для совместимости."""
+    raw = name.value
+    lowered = raw.lower()
+    patterns = [f"{lowered}.{{format}}"]
+    if raw != lowered:
+        patterns.append(f"{raw}.{{format}}")
+    return patterns
+
+
+def _patterns_with_default_fallback(name: BannerName) -> list[str]:
+    patterns = _banner_filename_patterns(name)
+    if name != BannerName.DEFAULT:
+        patterns.extend(_banner_filename_patterns(BannerName.DEFAULT))
+    return patterns
+
+
+def _ordered_locale_banner_dirs(
+    banners_dir: Path,
+    locale: Locale,
+    default_locale: Locale,
+) -> list[Path]:
+    seen: set[Path] = set()
+    ordered: list[Path] = []
+    for loc in (locale, default_locale):
+        for p in _locale_banner_subdirs(banners_dir, loc):
+            if p not in seen:
+                seen.add(p)
+                ordered.append(p)
+    return ordered
+
+
 @functools.lru_cache(maxsize=None)
 def get_banner(
     banners_dir: Path,
@@ -34,17 +78,15 @@ def get_banner(
                         return candidate, format.content_type
         return None
 
-    locale_dirs = [banners_dir / locale, banners_dir / default_locale]
+    locale_dirs = _ordered_locale_banner_dirs(banners_dir, locale, default_locale)
 
-    result = find_in_dirs(
-        locale_dirs, filenames=[f"{name}.{{format}}", f"{BannerName.DEFAULT}.{{format}}"]
-    )
+    result = find_in_dirs(locale_dirs, filenames=_patterns_with_default_fallback(name))
     if result:
         return result
 
     logger.warning(f"Banner '{name}' not found in locales '{locale}' or '{default_locale}'")
 
-    result = find_in_dirs([banners_dir], [f"{BannerName.DEFAULT}.{{format}}"])
+    result = find_in_dirs([banners_dir], filenames=_banner_filename_patterns(BannerName.DEFAULT))
     if result:
         return result
 

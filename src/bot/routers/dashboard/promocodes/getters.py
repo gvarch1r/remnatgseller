@@ -4,7 +4,7 @@ from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 
-from src.core.enums import PromocodeAvailability, PromocodeRewardType
+from src.core.enums import PlanType, PromocodeAvailability, PromocodeRewardType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import i18n_format_days, i18n_format_limit, i18n_format_traffic_limit
 from src.infrastructure.database.models.dto import PromocodeDto
@@ -45,6 +45,17 @@ async def configurator_getter(dialog_manager: DialogManager, **kwargs: Any) -> d
             "plan_duration": promocode.plan.duration,
         }
         data.update(plan)
+    elif promocode.reward_type == PromocodeRewardType.SUBSCRIPTION:
+        # Нет снимка плана — иначе { frg-plan-snapshot } / plan-type ломают Fluent (FluentNone)
+        data.update(
+            {
+                "plan_name": "—",
+                "plan_type": PlanType.UNLIMITED,
+                "plan_traffic_limit": "—",
+                "plan_device_limit": "—",
+                "plan_duration": "—",
+            }
+        )
 
     data.update(helpers)
 

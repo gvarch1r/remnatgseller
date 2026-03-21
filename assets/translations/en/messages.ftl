@@ -400,6 +400,9 @@ msg-promocode-reward-subscription =
 msg-promocode-lifetime = <b>⌛ Lifetime</b>
 
     Enter lifetime in <b>days</b>. Use <b>-1</b> for no expiry.
+msg-promocode-activations = <b>🔢 Activation limit</b>
+
+    How many times the promocode can be used. Use <b>-1</b> for unlimited, or an integer ≥ 0.
 msg-promocode-allowed-placeholder = <b>👥 Allowed users</b>
 
     Managing the allowed-user list for “Allowed only” access is not wired to the database yet. Return to the editor.

@@ -23,6 +23,7 @@ from .handlers import (
     on_promocode_availability_select,
     on_promocode_code_input,
     on_promocode_lifetime_input,
+    on_promocode_max_activations_input,
     on_promocode_reward_input,
     on_promocode_reward_type_select,
     on_promocode_search,
@@ -101,6 +102,11 @@ configurator = Window(
             text=I18nFormat("btn-promocode-lifetime"),
             id="lifetime",
             state=DashboardPromocodes.LIFETIME,
+        ),
+        SwitchTo(
+            text=I18nFormat("btn-promocode-activations"),
+            id="activations",
+            state=DashboardPromocodes.ACTIVATIONS,
         ),
     ),
     Row(
@@ -302,6 +308,21 @@ promocode_lifetime = Window(
     state=DashboardPromocodes.LIFETIME,
 )
 
+promocode_activations = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-promocode-activations"),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardPromocodes.CONFIGURATOR,
+        ),
+    ),
+    MessageInput(func=on_promocode_max_activations_input),
+    IgnoreUpdate(),
+    state=DashboardPromocodes.ACTIVATIONS,
+)
+
 promocode_allowed = Window(
     Banner(BannerName.DASHBOARD),
     I18nFormat("msg-promocode-allowed-placeholder"),
@@ -327,5 +348,6 @@ router = Dialog(
     promocode_availability,
     promocode_reward,
     promocode_lifetime,
+    promocode_activations,
     promocode_allowed,
 )

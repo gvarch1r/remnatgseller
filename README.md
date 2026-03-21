@@ -105,6 +105,6 @@ cd /opt/remnatgseller && docker compose pull && docker compose down && RESET_ASS
 
 ## Customization
 
-**Banners:** `/opt/remnatgseller/assets/banners/(locale)/` — formats: jpg, png, gif, webp. Keep `default.jpg`.
+**Banners:** `/opt/remnatgseller/assets/banners/(locale)/` — `locale` is lowercase (`en`, `ru`). File names **lowercase**, matching the screen: `menu`, `dashboard`, `subscription`, `promocode`, `referral`, `devices`, `about_us`, plus `default` (fallback). Extensions: jpg, png, gif, webp. Keep `default.jpg` (or `default.png`). Uppercase names (`MENU.jpg`) still work as a fallback.
 
 **Translations:** `/opt/remnatgseller/assets/translations/(locale)/` — edit and restart container.
