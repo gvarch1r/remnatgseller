@@ -86,3 +86,41 @@ purchase-type = { $purchase_type ->
 }
 
 payment-invoice-description-add-devices = { purchase-type } devices: { $name }
+
+# Types (dashboard / promocodes)
+plan-type = { $plan_type ->
+    [TRAFFIC] Traffic
+    [DEVICES] Devices
+    [BOTH] Traffic + devices
+    [UNLIMITED] Unlimited
+    *[OTHER] { $plan_type }
+}
+
+promocode-type = { $promocode_type ->
+    [DURATION] Duration
+    [TRAFFIC] Traffic
+    [DEVICES] Devices
+    [SUBSCRIPTION] Subscription
+    [PERSONAL_DISCOUNT] Personal discount
+    [PURCHASE_DISCOUNT] Purchase discount
+    *[OTHER] { $promocode_type }
+}
+
+availability-type = { $availability_type ->
+    [ALL] Everyone
+    [NEW] New users
+    [EXISTING] Existing users
+    [INVITED] Invited users
+    [ALLOWED] Allowed list
+    [TRIAL] Trial
+    *[OTHER] { $availability_type }
+}
+
+frg-plan-snapshot =
+    <blockquote>
+    • <b>Plan</b>: <code>{ $plan_name }</code>
+    • <b>Type</b>: { plan-type }
+    • <b>Traffic limit</b>: { $plan_traffic_limit }
+    • <b>Device limit</b>: { $plan_device_limit }
+    • <b>Duration</b>: { $plan_duration }
+    </blockquote>

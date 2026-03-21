@@ -340,3 +340,66 @@ msg-user-statistics =
     <blockquote>
     • Invited: { $referrals_count }
     </blockquote>
+
+# Promocodes
+msg-promocodes-main = <b>🎟 Promocodes</b>
+msg-promocodes-list = <b>📃 Promocode list</b>
+
+    Select a promocode to edit.
+msg-promocodes-search = <b>🔍 Search promocode</b>
+
+    Enter the code or part of the code.
+msg-promocodes-search-results = <b>🔍 Search results</b>
+
+    Select a promocode:
+msg-promocode-configurator =
+    <b>🎟 Promocode editor</b>
+
+    <blockquote>
+    • <b>Code</b>: { $code }
+    • <b>Type</b>: { promocode-type }
+    • <b>Access</b>: { availability-type }
+    • <b>Status</b>: { $is_active ->
+        [1] 🟢 Enabled
+        *[0] 🔴 Disabled
+        }
+    </blockquote>
+
+    <blockquote>
+    { $promocode_type ->
+    [DURATION] • <b>Duration</b>: { $reward }
+    [TRAFFIC] • <b>Traffic</b>: { $reward }
+    [DEVICES] • <b>Devices</b>: { $reward }
+    [SUBSCRIPTION] • <b>Subscription</b>: { frg-plan-snapshot }
+    [PERSONAL_DISCOUNT] • <b>Personal discount</b>: { $reward }%
+    [PURCHASE_DISCOUNT] • <b>Purchase discount</b>: { $reward }%
+    *[OTHER] { $promocode_type }
+    }
+    • <b>Lifetime</b>: { $lifetime }
+    • <b>Activation limit</b>: { $max_activations }
+    </blockquote>
+
+    Choose a field to change.
+
+msg-promocode-code = <b>🏷️ Promocode code</b>
+
+    Send the new code in one message (letters and digits).
+msg-promocode-type-select = <b>🔖 Reward type</b>
+
+    Select a type:
+msg-promocode-availability-select = <b>✴️ Access</b>
+
+    Who can use this promocode:
+msg-promocode-reward = <b>🎁 Reward</b>
+
+    Type: { promocode-type }
+msg-promocode-reward-numeric-hint =
+    Enter a whole number: days (duration), GB (traffic), device count, or discount percent — depending on the reward type.
+msg-promocode-reward-subscription =
+    For “Subscription”, the reward is defined by the plan snapshot (field <code>plan</code>). Editing it from here is not supported yet — go back.
+msg-promocode-lifetime = <b>⌛ Lifetime</b>
+
+    Enter lifetime in <b>days</b>. Use <b>-1</b> for no expiry.
+msg-promocode-allowed-placeholder = <b>👥 Allowed users</b>
+
+    Managing the allowed-user list for “Allowed only” access is not wired to the database yet. Return to the editor.

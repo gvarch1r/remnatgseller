@@ -36,6 +36,49 @@ btn-remnawave-inbounds = 🔌 Inbounds
 # RemnatgSeller
 btn-remnatgseller-device-addons = 📱 Device add-ons
 
+# Dashboard
+btn-dashboard-promocodes = 🎟 Promocodes
+
+# Promocodes
+btn-promocodes-list = 📃 List
+btn-promocodes-search = 🔍 Search
+btn-promocodes-create = 🆕 Create
+btn-promocodes-delete = 🗑️ Delete
+btn-promocodes-edit = ✏️ Edit
+
+btn-promocode-code = 🏷️ Code
+btn-promocode-type = 🔖 Reward type
+btn-promocode-availability = ✴️ Access
+
+btn-promocode-active = { $is_active ->
+    [1] 🟢
+    *[0] 🔴
+    } Status
+
+btn-promocode-reward = 🎁 Reward
+btn-promocode-lifetime = ⌛ Lifetime
+btn-promocode-allowed = 👥 Allowed users
+btn-promocode-confirm = ✅ Confirm
+
+btn-promocode-reward-type-choice = { $type ->
+    [DURATION] ⌛ Duration
+    [TRAFFIC] 🌐 Traffic
+    [DEVICES] 📱 Devices
+    [SUBSCRIPTION] 💳 Subscription
+    [PERSONAL_DISCOUNT] 🏷️ Personal discount
+    [PURCHASE_DISCOUNT] 💰 Purchase discount
+    *[OTHER] { $type }
+    }
+
+btn-promocode-availability-choice = { $type ->
+    [ALL] 🌍 Everyone
+    [NEW] 🌱 New users
+    [EXISTING] 👥 Existing users
+    [INVITED] ✉️ Invited
+    [ALLOWED] 🔐 Allowed list
+    *[OTHER] { $type }
+    }
+
 # Device addons
 btn-device-addons-create = 🆕 Add option
 btn-device-addon-active = { $is_active ->
