@@ -415,4 +415,9 @@ msg-promocode-activations = <b>🔢 Activation limit</b>
     How many times the promocode can be used. Use <b>-1</b> for unlimited, or an integer ≥ 0.
 msg-promocode-allowed-placeholder = <b>👥 Allowed users</b>
 
+msg-promocode-delete-confirm =
+    <b>🗑 Delete promocode</b>
+
+    Delete promocode <code>{ $delete_promocode_code }</code>? This cannot be undone.
+
     Managing the allowed-user list for “Allowed only” access is not wired to the database yet. Return to the editor.

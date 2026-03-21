@@ -482,3 +482,7 @@ ntf-promocode-reward-invalid-percent = <i>❌ Процент скидки дол
 ntf-promocode-lifetime-invalid = <i>❌ Укажите целое число дней или -1 для бессрочного.</i>
 ntf-promocode-activations-invalid = <i>❌ Укажите целое число ≥ 0 или -1 для безлимита.</i>
 ntf-promocode-subscription-plan-required = <i>❌ Для награды «Подписка» нужно выбрать план (Награда → Выбрать план).</i>
+ntf-promocode-subscription-activated-success = <i>✅ Промокод активирован. Подписка начислена: { $plan_name }.</i>
+ntf-promocode-subscription-activate-failed = <i>❌ Не удалось выдать подписку по промокоду. Попробуйте позже или обратитесь в поддержку.</i>
+ntf-promocode-deleted-success = <i>✅ Промокод <code>{ $code }</code> удалён.</i>
+ntf-promocode-delete-failed = <i>❌ Не удалось удалить промокод.</i>

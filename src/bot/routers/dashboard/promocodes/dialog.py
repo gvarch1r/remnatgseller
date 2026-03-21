@@ -13,6 +13,7 @@ from .getters import (
     configurator_getter,
     list_getter,
     promocode_availabilities_getter,
+    promocode_delete_confirm_getter,
     promocode_plan_duration_getter,
     promocode_plan_pick_getter,
     promocode_reward_getter,
@@ -22,6 +23,7 @@ from .getters import (
 from .handlers import (
     on_active_toggle,
     on_confirm_promocode,
+    on_promocode_delete_confirmed,
     on_promocode_availability_select,
     on_promocode_code_input,
     on_promocode_lifetime_input,
@@ -137,6 +139,14 @@ configurator = Window(
         ),
     ),
     Row(
+        SwitchTo(
+            text=I18nFormat("btn-promocodes-delete"),
+            id="to_delete_promocode",
+            state=DashboardPromocodes.DELETE_CONFIRM,
+            when=F["promocode_has_id"],
+        ),
+    ),
+    Row(
         Start(
             text=I18nFormat("btn-back"),
             id="back",
@@ -147,6 +157,28 @@ configurator = Window(
     IgnoreUpdate(),
     state=DashboardPromocodes.CONFIGURATOR,
     getter=configurator_getter,
+)
+
+promocode_delete_confirm = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-promocode-delete-confirm"),
+    Row(
+        Button(
+            text=I18nFormat("btn-promocode-delete-yes"),
+            id="delete_promocode_yes",
+            on_click=on_promocode_delete_confirmed,
+        ),
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardPromocodes.CONFIGURATOR,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=DashboardPromocodes.DELETE_CONFIRM,
+    getter=promocode_delete_confirm_getter,
 )
 
 promocodes_list = Window(
@@ -428,4 +460,5 @@ router = Dialog(
     promocode_lifetime,
     promocode_activations,
     promocode_allowed,
+    promocode_delete_confirm,
 )

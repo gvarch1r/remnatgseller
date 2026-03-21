@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 
 from aiogram import Bot
+from sqlalchemy import delete
 from fluentogram import TranslatorHub
 from loguru import logger
 from redis.asyncio import Redis
@@ -8,13 +9,16 @@ from redis.asyncio import Redis
 from src.core.config import AppConfig
 from src.core.enums import PromocodeRewardType
 from src.infrastructure.database import UnitOfWork
-from src.infrastructure.database.models.dto import PromocodeDto, UserDto
+from src.infrastructure.database.models.dto import PromocodeDto, SubscriptionDto, UserDto
+from src.infrastructure.database.models.sql.promocode import PromocodeActivation
 from src.infrastructure.redis import RedisRepository
 
 from src.core.enums import AuditActionType
 
 from .audit import AuditService
 from .base import BaseService
+from .remnawave import RemnawaveService
+from .subscription import SubscriptionService
 from .user import UserService
 
 
@@ -22,6 +26,8 @@ class PromocodeService(BaseService):
     uow: UnitOfWork
     user_service: UserService
     audit_service: AuditService
+    subscription_service: SubscriptionService
+    remnawave_service: RemnawaveService
 
     def __init__(
         self,
@@ -34,11 +40,15 @@ class PromocodeService(BaseService):
         uow: UnitOfWork,
         user_service: UserService,
         audit_service: AuditService,
+        subscription_service: SubscriptionService,
+        remnawave_service: RemnawaveService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
         self.user_service = user_service
         self.audit_service = audit_service
+        self.subscription_service = subscription_service
+        self.remnawave_service = remnawave_service
 
     async def create(self, promocode: PromocodeDto) -> PromocodeDto:
         from src.infrastructure.database.models.sql import Promocode
@@ -126,6 +136,11 @@ class PromocodeService(BaseService):
 
     async def delete(self, promocode_id: int) -> bool:
         async with self.uow:
+            await self.uow.session.execute(
+                delete(PromocodeActivation).where(
+                    PromocodeActivation.promocode_id == promocode_id
+                )
+            )
             result = await self.uow.repository.promocodes.delete(promocode_id)
 
         if result:
@@ -191,25 +206,89 @@ class PromocodeService(BaseService):
             if already_activated:
                 return False, "ntf-promocode-already-activated", None
 
-            if promocode.reward_type != PromocodeRewardType.PERSONAL_DISCOUNT:
-                return False, "ntf-promocode-unsupported-type", None
+            discount_applied = False
+            reward_percent = 0
 
-            reward = promocode.reward or 0
-            new_discount = max(user.personal_discount or 0, reward)
+            if promocode.reward_type == PromocodeRewardType.PERSONAL_DISCOUNT:
+                reward_percent = promocode.reward or 0
+                new_discount = max(user.personal_discount or 0, reward_percent)
+                await self.uow.repository.promocodes.create_activation(
+                    promocode.id,  # type: ignore[arg-type]
+                    user.telegram_id,
+                )
+                await self.uow.repository.users.update(
+                    user.telegram_id, personal_discount=new_discount
+                )
+                discount_applied = True
 
-            await self.uow.repository.promocodes.create_activation(
-                promocode.id,  # type: ignore[arg-type]
-                user.telegram_id,
+        if discount_applied:
+            await self.user_service.clear_user_cache(user.telegram_id)
+            await self.audit_service.log(
+                user_telegram_id=user.telegram_id,
+                action_type=AuditActionType.PROMOCODE_ACTIVATED,
+                details=f"code={promocode.code} discount={reward_percent}%",
             )
-            await self.uow.repository.users.update(
-                user.telegram_id, personal_discount=new_discount
-            )
+            logger.info(f"User {user.telegram_id} activated promocode '{promocode.code}' (discount)")
+            return True, "ntf-promocode-activated-success", {"percent": reward_percent}
 
-        await self.user_service.clear_user_cache(user.telegram_id)
-        await self.audit_service.log(
-            user_telegram_id=user.telegram_id,
-            action_type=AuditActionType.PROMOCODE_ACTIVATED,
-            details=f"code={promocode.code} discount={reward}%",
-        )
-        logger.info(f"User {user.telegram_id} activated promocode '{promocode.code}'")
-        return True, "ntf-promocode-activated-success", {"percent": reward}
+        if promocode.reward_type == PromocodeRewardType.SUBSCRIPTION:
+            if not promocode.plan:
+                return False, "ntf-promocode-subscription-plan-required", None
+
+            plan_snap = promocode.plan
+            try:
+                fresh_user = await self.user_service.get(user.telegram_id)
+                if not fresh_user:
+                    return False, "ntf-promocode-not-found", None
+
+                current_sub = await self.subscription_service.get_current(user.telegram_id)
+                if current_sub:
+                    remna_user = await self.remnawave_service.updated_user(
+                        user=fresh_user,
+                        uuid=current_sub.user_remna_id,
+                        plan=plan_snap,
+                        reset_traffic=True,
+                    )
+                else:
+                    remna_user = await self.remnawave_service.create_user(
+                        user=fresh_user, plan=plan_snap
+                    )
+
+                new_subscription = SubscriptionDto(
+                    user_remna_id=remna_user.uuid,
+                    status=remna_user.status,
+                    traffic_limit=plan_snap.traffic_limit,
+                    device_limit=plan_snap.device_limit,
+                    traffic_limit_strategy=plan_snap.traffic_limit_strategy,
+                    tag=plan_snap.tag,
+                    internal_squads=plan_snap.internal_squads,
+                    external_squad=plan_snap.external_squad,
+                    expire_at=remna_user.expire_at,
+                    url=remna_user.subscription_url,
+                    plan=plan_snap,
+                )
+                await self.subscription_service.create(fresh_user, new_subscription)
+            except Exception as exc:
+                logger.exception(
+                    f"User {user.telegram_id} failed subscription promocode '{promocode.code}': {exc}"
+                )
+                return False, "ntf-promocode-subscription-activate-failed", None
+
+            async with self.uow:
+                await self.uow.repository.promocodes.create_activation(
+                    promocode.id,  # type: ignore[arg-type]
+                    user.telegram_id,
+                )
+
+            await self.user_service.clear_user_cache(user.telegram_id)
+            await self.audit_service.log(
+                user_telegram_id=user.telegram_id,
+                action_type=AuditActionType.PROMOCODE_ACTIVATED,
+                details=f"code={promocode.code} subscription plan={plan_snap.name}",
+            )
+            logger.info(
+                f"User {user.telegram_id} activated promocode '{promocode.code}' (subscription)"
+            )
+            return True, "ntf-promocode-subscription-activated-success", {"plan_name": plan_snap.name}
+
+        return False, "ntf-promocode-unsupported-type", None

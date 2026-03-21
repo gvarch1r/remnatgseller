@@ -61,6 +61,7 @@ class DashboardPromocodes(StatesGroup):
     LIFETIME = State()
     ACTIVATIONS = State()
     ALLOWED = State()
+    DELETE_CONFIRM = State()
 
 
 class DashboardAccess(StatesGroup):

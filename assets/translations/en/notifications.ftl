@@ -18,6 +18,10 @@ ntf-promocode-reward-invalid-percent = <i>❌ Discount must be between 1 and 100
 ntf-promocode-lifetime-invalid = <i>❌ Enter days as an integer, or -1 for no expiry.</i>
 ntf-promocode-activations-invalid = <i>❌ Enter an integer ≥ 0, or -1 for unlimited activations.</i>
 ntf-promocode-subscription-plan-required = <i>❌ For “Subscription” reward, choose a plan (Reward → Choose plan).</i>
+ntf-promocode-subscription-activated-success = <i>✅ Promocode activated. Subscription granted: { $plan_name }.</i>
+ntf-promocode-subscription-activate-failed = <i>❌ Could not grant subscription from this promocode. Try again later or contact support.</i>
+ntf-promocode-deleted-success = <i>✅ Promocode <code>{ $code }</code> deleted.</i>
+ntf-promocode-delete-failed = <i>❌ Could not delete the promocode.</i>
 
 # Errors
 ntf-error-lost-context = <i>⚠️ An error occurred. Dialog restarted.</i>

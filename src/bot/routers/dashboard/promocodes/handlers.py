@@ -115,6 +115,45 @@ async def on_confirm_promocode(
 
 
 @inject
+async def on_promocode_delete_confirmed(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    promocodes: FromDishka[PromocodeService],
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto)
+
+    if not promocode or not promocode.id:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-delete-failed"),
+        )
+        await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+        return
+
+    deleted = await promocodes.delete(promocode.id)
+    if deleted:
+        logger.info(f"{log(user)} Deleted promocode '{promocode.code}' (id={promocode.id})")
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(
+                i18n_key="ntf-promocode-deleted-success",
+                i18n_kwargs={"code": promocode.code},
+            ),
+        )
+        await dialog_manager.reset_stack()
+        await dialog_manager.start(state=DashboardPromocodes.MAIN)
+    else:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-delete-failed"),
+        )
+
+
+@inject
 async def on_promocode_select(
     callback: CallbackQuery,
     widget: Select,

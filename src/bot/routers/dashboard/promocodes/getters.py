@@ -36,6 +36,7 @@ async def configurator_getter(dialog_manager: DialogManager, **kwargs: Any) -> d
         "availability_type": promocode.availability,
         "max_activations": i18n_format_limit(promocode.max_activations),
         "lifetime": i18n_format_days(promocode.lifetime),
+        "promocode_has_id": promocode.id is not None,
     }
 
     if promocode.plan:
@@ -62,6 +63,13 @@ async def configurator_getter(dialog_manager: DialogManager, **kwargs: Any) -> d
     data.update(helpers)
 
     return data
+
+
+async def promocode_delete_confirm_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str, Any]:
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto)
+    code = promocode.code if promocode else "—"
+    return {"delete_promocode_code": code}
 
 
 @inject

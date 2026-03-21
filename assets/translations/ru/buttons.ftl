@@ -452,6 +452,7 @@ btn-promocode-lifetime = ⌛ Время жизни
 btn-promocode-activations = 🔢 Лимит активаций
 btn-promocode-allowed = 👥 Разрешенные пользователи
 btn-promocode-confirm = ✅ Подтвердить
+btn-promocode-delete-yes = ✅ Да, удалить
 
 btn-promocode-reward-type-choice = { $type -> 
     [DURATION] ⌛ Длительность
