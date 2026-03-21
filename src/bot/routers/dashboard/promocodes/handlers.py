@@ -350,11 +350,11 @@ async def on_promocode_reward_plan_select(
     callback: CallbackQuery,
     widget: Select,
     dialog_manager: DialogManager,
-    plan_service: FromDishka[PlanService],
-    selected_id: str,
+    selected_plan_id: int,
+    # Avoid name `plan_service`: aiogram-dialog may pass it as a Select kwarg and clash with Dishka.
+    plans: FromDishka[PlanService],
 ) -> None:
-    plan_id = int(selected_id)
-    plan = await plan_service.get(plan_id)
+    plan = await plans.get(selected_plan_id)
     if not plan or not plan.is_active:
         return
 
@@ -378,7 +378,7 @@ async def on_promocode_reward_plan_select(
         await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
         return
 
-    dialog_manager.dialog_data[PROMOCODE_PENDING_PLAN_ID] = plan_id
+    dialog_manager.dialog_data[PROMOCODE_PENDING_PLAN_ID] = selected_plan_id
     await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_DURATION)
 
 
@@ -387,16 +387,16 @@ async def on_promocode_reward_duration_select(
     callback: CallbackQuery,
     widget: Select,
     dialog_manager: DialogManager,
-    plan_service: FromDishka[PlanService],
-    selected_id: str,
+    selected_duration: int,
+    plans: FromDishka[PlanService],
 ) -> None:
-    days = int(selected_id)
+    days = selected_duration
     raw_id = dialog_manager.dialog_data.get(PROMOCODE_PENDING_PLAN_ID)
     if raw_id is None:
         await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_PICK)
         return
 
-    plan = await plan_service.get(int(raw_id))
+    plan = await plans.get(int(raw_id))
     if not plan:
         dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
         await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_PICK)
