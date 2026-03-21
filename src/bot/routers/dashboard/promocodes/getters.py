@@ -4,7 +4,7 @@ from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 
-from src.core.enums import PromocodeRewardType
+from src.core.enums import PromocodeAvailability, PromocodeRewardType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import i18n_format_days, i18n_format_limit, i18n_format_traffic_limit
 from src.infrastructure.database.models.dto import PromocodeDto
@@ -77,3 +77,20 @@ async def search_results_getter(
     raw = dialog_manager.dialog_data.get("search_results", [])
     items = [r if isinstance(r, dict) else PromocodeDto.model_validate(r).model_dump(mode="json") for r in raw]
     return {"search_results": items}
+
+
+async def promocode_reward_types_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str, Any]:
+    return {"reward_types": list(PromocodeRewardType)}
+
+
+async def promocode_availabilities_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str, Any]:
+    return {"availabilities": list(PromocodeAvailability)}
+
+
+async def promocode_reward_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str, Any]:
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    return {
+        "reward_type": promocode.reward_type,
+        "needs_numeric_reward": promocode.reward_type != PromocodeRewardType.SUBSCRIPTION,
+    }

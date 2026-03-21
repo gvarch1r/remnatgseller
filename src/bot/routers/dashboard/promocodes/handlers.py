@@ -8,6 +8,7 @@ from loguru import logger
 
 from src.bot.states import Dashboard, DashboardPromocodes
 from src.core.constants import USER_KEY
+from src.core.enums import PromocodeAvailability, PromocodeRewardType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
@@ -32,7 +33,6 @@ async def on_active_toggle(
     promocode.is_active = not promocode.is_active
     adapter.save(promocode)
     logger.debug(f"Toggled promocode is_active -> {promocode.is_active}")
-    await dialog_manager.dialog().refresh()
 
 
 @inject
@@ -166,3 +166,139 @@ async def on_promocode_search(
             p.model_dump(mode="json") for p in found
         ]
         await dialog_manager.switch_to(state=DashboardPromocodes.SEARCH_RESULTS)
+
+
+@inject
+async def on_promocode_code_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    text = message.text.strip() if message.text else ""
+    if not text:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-invalid-code"),
+        )
+        return
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.code = text.upper()
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+async def on_promocode_reward_type_select(
+    callback: CallbackQuery,
+    widget: Select[PromocodeRewardType],
+    dialog_manager: DialogManager,
+    selected_type: PromocodeRewardType,
+) -> None:
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.reward_type = selected_type
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+async def on_promocode_availability_select(
+    callback: CallbackQuery,
+    widget: Select[PromocodeAvailability],
+    dialog_manager: DialogManager,
+    selected_availability: PromocodeAvailability,
+) -> None:
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.availability = selected_availability
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+@inject
+async def on_promocode_reward_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    raw = message.text.strip() if message.text else ""
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+
+    if promocode.reward_type == PromocodeRewardType.SUBSCRIPTION:
+        await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+        return
+
+    if not raw or not raw.isdigit():
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-reward-invalid-number"),
+        )
+        return
+
+    value = int(raw)
+    rt = promocode.reward_type
+
+    if rt in (PromocodeRewardType.PERSONAL_DISCOUNT, PromocodeRewardType.PURCHASE_DISCOUNT):
+        if not 1 <= value <= 100:
+            await notification_service.notify_user(
+                user=user,
+                payload=MessagePayload(i18n_key="ntf-promocode-reward-invalid-percent"),
+            )
+            return
+    elif rt == PromocodeRewardType.DURATION and value < 1:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-reward-invalid-number"),
+        )
+        return
+    elif rt in (PromocodeRewardType.TRAFFIC, PromocodeRewardType.DEVICES) and value < 1:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-reward-invalid-number"),
+        )
+        return
+
+    promocode.reward = value
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+@inject
+async def on_promocode_lifetime_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    notification_service: FromDishka[NotificationService],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    raw = message.text.strip() if message.text else ""
+
+    if not raw or not raw.lstrip("-").isdigit():
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-lifetime-invalid"),
+        )
+        return
+
+    value = int(raw)
+    if value < -1:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-lifetime-invalid"),
+        )
+        return
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.lifetime = value
+    adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)

@@ -450,3 +450,22 @@ btn-promocode-reward = 🎁 Награда
 btn-promocode-lifetime = ⌛ Время жизни
 btn-promocode-allowed = 👥 Разрешенные пользователи
 btn-promocode-confirm = ✅ Подтвердить
+
+btn-promocode-reward-type-choice = { $type -> 
+    [DURATION] ⌛ Длительность
+    [TRAFFIC] 🌐 Трафик
+    [DEVICES] 📱 Устройства
+    [SUBSCRIPTION] 💳 Подписка
+    [PERSONAL_DISCOUNT] 🏷️ Персональная скидка
+    [PURCHASE_DISCOUNT] 💰 Скидка на покупку
+    *[OTHER] { $type }
+    }
+
+btn-promocode-availability-choice = { $type -> 
+    [ALL] 🌍 Для всех
+    [NEW] 🌱 Для новых
+    [EXISTING] 👥 Для существующих
+    [INVITED] ✉️ Для приглашённых
+    [ALLOWED] 🔐 Для разрешённых
+    *[OTHER] { $type }
+    }

@@ -477,3 +477,6 @@ ntf-promocode-expired = <i>❌ Срок действия промокода ис
 ntf-promocode-depleted = <i>❌ Промокод исчерпан (достигнут лимит активаций).</i>
 ntf-promocode-already-activated = <i>❌ Вы уже активировали этот промокод ранее.</i>
 ntf-promocode-unsupported-type = <i>❌ Этот тип промокода не поддерживается для активации.</i>
+ntf-promocode-reward-invalid-number = <i>❌ Введите положительное целое число.</i>
+ntf-promocode-reward-invalid-percent = <i>❌ Процент скидки должен быть от 1 до 100.</i>
+ntf-promocode-lifetime-invalid = <i>❌ Укажите целое число дней или -1 для бессрочного.</i>

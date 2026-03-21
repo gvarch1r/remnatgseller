@@ -13,6 +13,9 @@ ntf-promocode-expired = <i>❌ This promocode has expired.</i>
 ntf-promocode-depleted = <i>❌ This promocode has reached its activation limit.</i>
 ntf-promocode-already-activated = <i>❌ You have already activated this promocode.</i>
 ntf-promocode-unsupported-type = <i>❌ This promocode type is not supported for activation.</i>
+ntf-promocode-reward-invalid-number = <i>❌ Enter a positive integer.</i>
+ntf-promocode-reward-invalid-percent = <i>❌ Discount must be between 1 and 100 percent.</i>
+ntf-promocode-lifetime-invalid = <i>❌ Enter days as an integer, or -1 for no expiry.</i>
 
 # Errors
 ntf-error-lost-context = <i>⚠️ An error occurred. Dialog restarted.</i>
