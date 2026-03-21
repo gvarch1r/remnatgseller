@@ -51,11 +51,12 @@ async def redirect_to_successed_trial_task(
 async def redirect_to_successed_payment_task(
     user: UserDto,
     purchase_type: PurchaseType,
-    device_count: int | None = None,
+    device_count: int | None,
+    *,
     bot: FromDishka[Bot],
     bg_manager_factory: FromDishka[BgManagerFactory],
 ) -> None:
-    # kiq(user, purchase_type, device_count|None) — третий аргумент это device_count, не bot (FromDishka).
+    """kiq(user, purchase_type, device_count); Dishka injects bot, bg_manager_factory (kw-only)."""
     bg_manager = bg_manager_factory.bg(
         bot=bot,
         user_id=user.telegram_id,
