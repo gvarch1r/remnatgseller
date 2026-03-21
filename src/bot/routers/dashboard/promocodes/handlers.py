@@ -42,7 +42,7 @@ async def on_confirm_promocode(
     widget: Button,
     dialog_manager: DialogManager,
     notification_service: FromDishka[NotificationService],
-    promocode_service: FromDishka[PromocodeService],
+    promocodes: FromDishka[PromocodeService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
 
@@ -74,14 +74,14 @@ async def on_confirm_promocode(
 
     try:
         if promocode.id:
-            existing = await promocode_service.get_by_code(promocode.code)
+            existing = await promocodes.get_by_code(promocode.code)
             if existing and existing.id != promocode.id:
                 await notification_service.notify_user(
                     user=user,
                     payload=MessagePayload(i18n_key="ntf-promocode-code-exists"),
                 )
                 return
-            updated = await promocode_service.update(promocode)
+            updated = await promocodes.update(promocode)
             if updated:
                 logger.info(f"{log(user)} Updated promocode '{promocode.code}'")
                 await notification_service.notify_user(
@@ -89,14 +89,14 @@ async def on_confirm_promocode(
                     payload=MessagePayload(i18n_key="ntf-promocode-updated-success"),
                 )
         else:
-            existing = await promocode_service.get_by_code(promocode.code)
+            existing = await promocodes.get_by_code(promocode.code)
             if existing:
                 await notification_service.notify_user(
                     user=user,
                     payload=MessagePayload(i18n_key="ntf-promocode-code-exists"),
                 )
                 return
-            await promocode_service.create(promocode)
+            await promocodes.create(promocode)
             logger.info(f"{log(user)} Created promocode '{promocode.code}'")
             await notification_service.notify_user(
                 user=user,
@@ -119,14 +119,14 @@ async def on_promocode_select(
     callback: CallbackQuery,
     widget: Select,
     dialog_manager: DialogManager,
-    promocode_service: FromDishka[PromocodeService],
-    selected_id: str,
+    selected_promocode_id: int,
+    # Avoid name `promocode_service`: aiogram-dialog Select may pass it as a kwarg (clash with Dishka).
+    promocodes: FromDishka[PromocodeService],
 ) -> None:
-    # Select can pass int or str depending on type_factory
-    promocode_id = int(selected_id) if isinstance(selected_id, str) else selected_id
+    promocode_id = selected_promocode_id
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
 
-    promocode = await promocode_service.get(promocode_id)
+    promocode = await promocodes.get(promocode_id)
     if not promocode:
         return
 
@@ -141,7 +141,7 @@ async def on_promocode_search(
     message: Message,
     widget: MessageInput,
     dialog_manager: DialogManager,
-    promocode_service: FromDishka[PromocodeService],
+    promocodes: FromDishka[PromocodeService],
     notification_service: FromDishka[NotificationService],
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
@@ -158,7 +158,7 @@ async def on_promocode_search(
         )
         return
 
-    found = await promocode_service.search_by_code(query)
+    found = await promocodes.search_by_code(query)
 
     if not found:
         await notification_service.notify_user(

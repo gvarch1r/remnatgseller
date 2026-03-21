@@ -67,10 +67,10 @@ async def configurator_getter(dialog_manager: DialogManager, **kwargs: Any) -> d
 @inject
 async def list_getter(
     dialog_manager: DialogManager,
-    promocode_service: FromDishka[PromocodeService],
+    promocodes_svc: FromDishka[PromocodeService],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    promocodes = await promocode_service.get_all()
+    promocodes = await promocodes_svc.get_all()
     items = [
         {
             "id": p.id,
