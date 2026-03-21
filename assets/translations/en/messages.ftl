@@ -396,7 +396,17 @@ msg-promocode-reward = <b>🎁 Reward</b>
 msg-promocode-reward-numeric-hint =
     Enter a whole number: days (duration), GB (traffic), device count, or discount percent — depending on the reward type.
 msg-promocode-reward-subscription =
-    For “Subscription”, the reward is defined by the plan snapshot (field <code>plan</code>). Editing it from here is not supported yet — go back.
+    Tap <b>«Choose plan»</b>, then pick a plan and duration (if the plan has multiple options).
+msg-promocode-plan-pick = <b>💳 Plan for reward</b>
+
+    Select an active plan:
+msg-promocode-plan-duration = <b>⌛ Subscription term</b>
+
+    Plan: <b>{ $plan_name }</b>
+
+    Choose duration:
+msg-promocode-plan-duration-missing =
+    No duration options for this plan. Go back and pick another plan.
 msg-promocode-lifetime = <b>⌛ Lifetime</b>
 
     Enter lifetime in <b>days</b>. Use <b>-1</b> for no expiry.

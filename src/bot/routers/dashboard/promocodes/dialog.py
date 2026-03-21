@@ -13,6 +13,8 @@ from .getters import (
     configurator_getter,
     list_getter,
     promocode_availabilities_getter,
+    promocode_plan_duration_getter,
+    promocode_plan_pick_getter,
     promocode_reward_getter,
     promocode_reward_types_getter,
     search_results_getter,
@@ -24,7 +26,9 @@ from .handlers import (
     on_promocode_code_input,
     on_promocode_lifetime_input,
     on_promocode_max_activations_input,
+    on_promocode_reward_duration_select,
     on_promocode_reward_input,
+    on_promocode_reward_plan_select,
     on_promocode_reward_type_select,
     on_promocode_search,
     on_promocode_select,
@@ -107,6 +111,14 @@ configurator = Window(
             text=I18nFormat("btn-promocode-activations"),
             id="activations",
             state=DashboardPromocodes.ACTIVATIONS,
+        ),
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-promocode-subscription-plan"),
+            id="cfg_subscription_plan",
+            state=DashboardPromocodes.PLAN_PICK,
+            when=F["reward_type"] == PromocodeRewardType.SUBSCRIPTION,
         ),
     ),
     Row(
@@ -279,7 +291,15 @@ promocode_reward = Window(
     Banner(BannerName.DASHBOARD),
     I18nFormat("msg-promocode-reward", promocode_type=F["reward_type"]),
     I18nFormat("msg-promocode-reward-numeric-hint", when=F["needs_numeric_reward"]),
-    I18nFormat("msg-promocode-reward-subscription", when=~F["needs_numeric_reward"]),
+    I18nFormat("msg-promocode-reward-subscription", when=F["needs_subscription_plan"]),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-promocode-subscription-plan"),
+            id="pick_subscription_plan",
+            state=DashboardPromocodes.PLAN_PICK,
+            when=F["needs_subscription_plan"],
+        ),
+    ),
     Row(
         SwitchTo(
             text=I18nFormat("btn-back"),
@@ -291,6 +311,62 @@ promocode_reward = Window(
     IgnoreUpdate(),
     state=DashboardPromocodes.REWARD,
     getter=promocode_reward_getter,
+)
+
+promocode_plan_pick = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-promocode-plan-pick"),
+    ScrollingGroup(
+        Select(
+            text=Format("{item[name]}"),
+            id="promocode_pick_plan",
+            item_id_getter=lambda item: item["id"],
+            items="promocode_plans",
+            type_factory=int,
+            on_click=on_promocode_reward_plan_select,
+        ),
+        id="promocode_plans_scroll",
+        width=1,
+        height=8,
+        hide_on_single_page=True,
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardPromocodes.REWARD,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=DashboardPromocodes.PLAN_PICK,
+    getter=promocode_plan_pick_getter,
+)
+
+promocode_plan_duration = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-promocode-plan-duration", plan_name=F["plan_name"]),
+    I18nFormat("msg-promocode-plan-duration-missing", when=~F["has_plan_durations"]),
+    Column(
+        Select(
+            text=Format("⌛ {item[caption]}"),
+            id="promocode_pick_duration",
+            item_id_getter=lambda item: item["days"],
+            items="plan_durations",
+            type_factory=int,
+            on_click=on_promocode_reward_duration_select,
+        ),
+        when=F["has_plan_durations"],
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back"),
+            id="back",
+            state=DashboardPromocodes.PLAN_PICK,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=DashboardPromocodes.PLAN_DURATION,
+    getter=promocode_plan_duration_getter,
 )
 
 promocode_lifetime = Window(
@@ -347,6 +423,8 @@ router = Dialog(
     promocode_type,
     promocode_availability,
     promocode_reward,
+    promocode_plan_pick,
+    promocode_plan_duration,
     promocode_lifetime,
     promocode_activations,
     promocode_allowed,

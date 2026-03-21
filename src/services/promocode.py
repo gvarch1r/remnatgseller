@@ -96,10 +96,22 @@ class PromocodeService(BaseService):
         return PromocodeDto.from_model_list(db_promocodes)
 
     async def update(self, promocode: PromocodeDto) -> Optional[PromocodeDto]:
+        # Не использовать changed_data: при from_model() в TrackableDto попадают все поля DTO,
+        # включая availability / activations — колонок в promocodes нет → падение SQLAlchemy.
+        update_data = {
+            "code": promocode.code,
+            "is_active": promocode.is_active,
+            "reward_type": promocode.reward_type,
+            "reward": promocode.reward if promocode.reward is not None else None,
+            "plan": promocode.plan.model_dump(mode="json") if promocode.plan else None,
+            "lifetime": promocode.lifetime if promocode.lifetime >= 0 else None,
+            "max_activations": promocode.max_activations if promocode.max_activations >= 0 else None,
+        }
+
         async with self.uow:
             db_updated_promocode = await self.uow.repository.promocodes.update(
                 promocode_id=promocode.id,  # type: ignore[arg-type]
-                **promocode.changed_data,
+                **update_data,
             )
 
         if db_updated_promocode:

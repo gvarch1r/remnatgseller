@@ -56,6 +56,7 @@ btn-promocode-active = { $is_active ->
     } Status
 
 btn-promocode-reward = 🎁 Reward
+btn-promocode-subscription-plan = 🔗 Choose plan
 btn-promocode-lifetime = ⌛ Lifetime
 btn-promocode-activations = 🔢 Activation limit
 btn-promocode-allowed = 👥 Allowed users

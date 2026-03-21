@@ -36,6 +36,7 @@ MIDDLEWARE_DATA_KEY: Final[str] = "middleware_data"
 CONTAINER_KEY: Final[str] = "dishka_container"
 CONFIG_KEY: Final[str] = "config"
 USER_KEY: Final[str] = "user"
+PROMOCODE_PENDING_PLAN_ID: Final[str] = "promocode_pending_plan_id"
 IS_SUPER_DEV_KEY: Final[str] = "is_super_dev"
 
 TIME_1M: Final[int] = 60

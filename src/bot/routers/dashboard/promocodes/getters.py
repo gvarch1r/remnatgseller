@@ -4,10 +4,12 @@ from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 
+from src.core.constants import PROMOCODE_PENDING_PLAN_ID
 from src.core.enums import PlanType, PromocodeAvailability, PromocodeRewardType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import i18n_format_days, i18n_format_limit, i18n_format_traffic_limit
 from src.infrastructure.database.models.dto import PromocodeDto
+from src.services.plan import PlanService
 from src.services.promocode import PromocodeService
 
 
@@ -104,4 +106,49 @@ async def promocode_reward_getter(dialog_manager: DialogManager, **kwargs: Any) 
     return {
         "reward_type": promocode.reward_type,
         "needs_numeric_reward": promocode.reward_type != PromocodeRewardType.SUBSCRIPTION,
+        "needs_subscription_plan": promocode.reward_type == PromocodeRewardType.SUBSCRIPTION,
+    }
+
+
+@inject
+async def promocode_plan_pick_getter(
+    dialog_manager: DialogManager,
+    plan_service: FromDishka[PlanService],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
+    plans = await plan_service.get_all()
+    items = [
+        {"id": p.id, "name": p.name}
+        for p in plans
+        if p.is_active and p.id is not None
+    ]
+    return {"promocode_plans": items}
+
+
+@inject
+async def promocode_plan_duration_getter(
+    dialog_manager: DialogManager,
+    plan_service: FromDishka[PlanService],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    raw_id = dialog_manager.dialog_data.get(PROMOCODE_PENDING_PLAN_ID)
+    if raw_id is None:
+        return {"plan_durations": [], "plan_name": "", "has_plan_durations": False}
+
+    plan = await plan_service.get(int(raw_id))
+    if not plan:
+        return {"plan_durations": [], "plan_name": "", "has_plan_durations": False}
+
+    items = [
+        {
+            "days": d.days,
+            "caption": "∞" if d.days == -1 else f"{d.days} дн.",
+        }
+        for d in plan.durations
+    ]
+    return {
+        "plan_durations": items,
+        "plan_name": plan.name,
+        "has_plan_durations": bool(items),
     }

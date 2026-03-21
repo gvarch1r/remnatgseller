@@ -17,6 +17,7 @@ ntf-promocode-reward-invalid-number = <i>❌ Enter a positive integer.</i>
 ntf-promocode-reward-invalid-percent = <i>❌ Discount must be between 1 and 100 percent.</i>
 ntf-promocode-lifetime-invalid = <i>❌ Enter days as an integer, or -1 for no expiry.</i>
 ntf-promocode-activations-invalid = <i>❌ Enter an integer ≥ 0, or -1 for unlimited activations.</i>
+ntf-promocode-subscription-plan-required = <i>❌ For “Subscription” reward, choose a plan (Reward → Choose plan).</i>
 
 # Errors
 ntf-error-lost-context = <i>⚠️ An error occurred. Dialog restarted.</i>

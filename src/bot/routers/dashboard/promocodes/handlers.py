@@ -7,13 +7,14 @@ from dishka.integrations.aiogram_dialog import inject
 from loguru import logger
 
 from src.bot.states import Dashboard, DashboardPromocodes
-from src.core.constants import USER_KEY
+from src.core.constants import PROMOCODE_PENDING_PLAN_ID, USER_KEY
 from src.core.enums import PromocodeAvailability, PromocodeRewardType
 from src.core.utils.adapter import DialogDataAdapter
 from src.core.utils.formatters import format_user_log as log
 from src.core.utils.message_payload import MessagePayload
-from src.infrastructure.database.models.dto import PromocodeDto, UserDto
+from src.infrastructure.database.models.dto import PlanSnapshotDto, PromocodeDto, UserDto
 from src.services.notification import NotificationService
+from src.services.plan import PlanService
 from src.services.promocode import PromocodeService
 
 
@@ -63,6 +64,13 @@ async def on_confirm_promocode(
         return
 
     promocode.code = promocode.code.strip().upper()
+
+    if promocode.reward_type == PromocodeRewardType.SUBSCRIPTION and not promocode.plan:
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-promocode-subscription-plan-required"),
+        )
+        return
 
     try:
         if promocode.id:
@@ -334,4 +342,72 @@ async def on_promocode_max_activations_input(
     promocode = adapter.load(PromocodeDto) or PromocodeDto()
     promocode.max_activations = value
     adapter.save(promocode)
+    await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+
+
+@inject
+async def on_promocode_reward_plan_select(
+    callback: CallbackQuery,
+    widget: Select,
+    dialog_manager: DialogManager,
+    plan_service: FromDishka[PlanService],
+    selected_id: str,
+) -> None:
+    plan_id = int(selected_id)
+    plan = await plan_service.get(plan_id)
+    if not plan or not plan.is_active:
+        return
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    if promocode.reward_type != PromocodeRewardType.SUBSCRIPTION:
+        await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+        return
+
+    if not plan.durations:
+        promocode.plan = PlanSnapshotDto.from_plan(plan, -1)
+        adapter.save(promocode)
+        dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
+        await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+        return
+
+    if len(plan.durations) == 1:
+        promocode.plan = PlanSnapshotDto.from_plan(plan, plan.durations[0].days)
+        adapter.save(promocode)
+        dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
+        await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
+        return
+
+    dialog_manager.dialog_data[PROMOCODE_PENDING_PLAN_ID] = plan_id
+    await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_DURATION)
+
+
+@inject
+async def on_promocode_reward_duration_select(
+    callback: CallbackQuery,
+    widget: Select,
+    dialog_manager: DialogManager,
+    plan_service: FromDishka[PlanService],
+    selected_id: str,
+) -> None:
+    days = int(selected_id)
+    raw_id = dialog_manager.dialog_data.get(PROMOCODE_PENDING_PLAN_ID)
+    if raw_id is None:
+        await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_PICK)
+        return
+
+    plan = await plan_service.get(int(raw_id))
+    if not plan:
+        dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
+        await dialog_manager.switch_to(state=DashboardPromocodes.PLAN_PICK)
+        return
+
+    if not any(d.days == days for d in plan.durations):
+        return
+
+    adapter = DialogDataAdapter(dialog_manager)
+    promocode = adapter.load(PromocodeDto) or PromocodeDto()
+    promocode.plan = PlanSnapshotDto.from_plan(plan, days)
+    adapter.save(promocode)
+    dialog_manager.dialog_data.pop(PROMOCODE_PENDING_PLAN_ID, None)
     await dialog_manager.switch_to(state=DashboardPromocodes.CONFIGURATOR)
