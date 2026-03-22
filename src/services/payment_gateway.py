@@ -48,6 +48,7 @@ from src.services.audit import AuditService
 from src.services.notification import NotificationService
 from src.services.referral import ReferralService
 from src.services.subscription import SubscriptionService
+from src.services.user import UserService
 
 from .base import BaseService
 from .transaction import TransactionService
@@ -60,6 +61,7 @@ class PaymentGatewayService(BaseService):
     payment_gateway_factory: PaymentGatewayFactory
     referral_service: ReferralService
     audit_service: AuditService
+    user_service: UserService
 
     def __init__(
         self,
@@ -76,6 +78,7 @@ class PaymentGatewayService(BaseService):
         referral_service: ReferralService,
         notification_service: NotificationService,
         audit_service: AuditService,
+        user_service: UserService,
     ) -> None:
         super().__init__(config, bot, redis_client, redis_repository, translator_hub)
         self.uow = uow
@@ -85,6 +88,7 @@ class PaymentGatewayService(BaseService):
         self.referral_service = referral_service
         self.notification_service = notification_service
         self.audit_service = audit_service
+        self.user_service = user_service
 
     async def create_default(self) -> None:
         for gateway_type in PaymentGatewayType:
@@ -418,6 +422,13 @@ class PaymentGatewayService(BaseService):
         )
 
         await purchase_subscription_task.kiq(transaction, subscription)
+
+        async with self.uow:
+            await self.uow.repository.users.update(
+                transaction.user.telegram_id,
+                purchase_discount=0,
+            )
+        await self.user_service.clear_user_cache(transaction.user.telegram_id)
 
         if not transaction.pricing.is_free:
             await self.referral_service.assign_referral_rewards(transaction=transaction)

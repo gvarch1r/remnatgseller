@@ -221,6 +221,18 @@ class PromocodeService(BaseService):
                 )
                 discount_applied = True
 
+            elif promocode.reward_type == PromocodeRewardType.PURCHASE_DISCOUNT:
+                reward_percent = promocode.reward or 0
+                new_discount = max(user.purchase_discount or 0, reward_percent)
+                await self.uow.repository.promocodes.create_activation(
+                    promocode.id,  # type: ignore[arg-type]
+                    user.telegram_id,
+                )
+                await self.uow.repository.users.update(
+                    user.telegram_id, purchase_discount=new_discount
+                )
+                discount_applied = True
+
         if discount_applied:
             await self.user_service.clear_user_cache(user.telegram_id)
             await self.audit_service.log(
