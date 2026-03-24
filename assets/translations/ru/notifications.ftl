@@ -428,6 +428,7 @@ ntf-subscription-plans-not-available = <i>❌ Нет доступных план
 ntf-subscription-addons-not-available = <i>❌ Нет доступных опций докупки устройств.</i>
 ntf-subscription-gateways-not-available = <i>❌ Нет доступных платежных систем.</i>
 ntf-subscription-renew-plan-unavailable = <i>❌ Ваш план устарел и не доступен для продления.</i>
+ntf-subscription-trial-renew-not-allowed = <i>❌ Пробный период нельзя продлить. Оформите платную подписку — в меню подписки выберите «Новая подписка».</i>
 ntf-subscription-payment-creation-failed = <i>❌ Произошла ошибка при создании платежа, попробуйте позже.</i>
 
 ntf-broadcast-list-empty = <i>❌ Список рассылок пуст.</i>

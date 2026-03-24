@@ -3,6 +3,7 @@ ntf-subscription-plans-not-available = <i>❌ No plans available.</i>
 ntf-subscription-addons-not-available = <i>❌ No device add-on options available.</i>
 ntf-subscription-gateways-not-available = <i>❌ No payment gateways available.</i>
 ntf-subscription-renew-plan-unavailable = <i>❌ Your plan is no longer available for renewal.</i>
+ntf-subscription-trial-renew-not-allowed = <i>❌ You can’t renew a trial. Subscribe to a paid plan — in the subscription menu, choose “New subscription”.</i>
 ntf-subscription-payment-creation-failed = <i>❌ An error occurred while creating the payment. Please try again later.</i>
 
 # Promocodes

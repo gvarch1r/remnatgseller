@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any
 
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
@@ -100,6 +100,16 @@ async def plans_getter(
     plan_service: FromDishka[PlanService],
     **kwargs: Any,
 ) -> dict[str, Any]:
+    # Same as device_addons_getter: deep link / expiry notification starts at PLANS with
+    # start_data only; handlers that set dialog_data["purchase_type"] never run.
+    start_data = dialog_manager.start_data or {}
+    if "purchase_type" in start_data:
+        pt = PurchaseType(start_data["purchase_type"])
+        sub = user.current_subscription
+        if pt == PurchaseType.RENEW and sub is not None and sub.is_trial:
+            pt = PurchaseType.NEW
+        dialog_manager.dialog_data["purchase_type"] = pt
+
     plans = await plan_service.get_available_plans(user)
 
     formatted_plans = [
@@ -340,8 +350,11 @@ async def success_payment_getter(
     i18n: FromDishka[TranslatorRunner],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    start_data = cast(dict[str, Any], dialog_manager.start_data)
-    purchase_type: PurchaseType = start_data["purchase_type"]
+    start_data = dialog_manager.start_data or {}
+    pt = start_data.get("purchase_type") or dialog_manager.dialog_data.get("purchase_type")
+    if pt is None:
+        raise ValueError("purchase_type missing in start_data and dialog_data after payment")
+    purchase_type = pt if isinstance(pt, PurchaseType) else PurchaseType(pt)
     subscription = user.current_subscription
 
     if not subscription:

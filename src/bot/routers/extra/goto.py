@@ -21,6 +21,10 @@ async def on_goto(callback: CallbackQuery, dialog_manager: DialogManager, user: 
         purchase_type_str = data.removeprefix(PURCHASE_PREFIX).strip()
         try:
             purchase_type = PurchaseType(purchase_type_str)
+            sub = user.current_subscription
+            if purchase_type == PurchaseType.RENEW and sub is not None and sub.is_trial:
+                purchase_type = PurchaseType.NEW
+                logger.debug(f"{log(user)} GOTO purchase: coerced RENEW -> NEW (trial)")
             start_data = {"purchase_type": purchase_type.value}
         except ValueError:
             start_data = {}

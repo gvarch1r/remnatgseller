@@ -37,6 +37,11 @@ CURRENT_DURATION_KEY = "selected_duration"
 CURRENT_METHOD_KEY = "selected_payment_method"
 
 
+def _is_trial_renew_blocked(user: UserDto, purchase_type: PurchaseType) -> bool:
+    sub = user.current_subscription
+    return purchase_type == PurchaseType.RENEW and sub is not None and sub.is_trial
+
+
 class CachedPaymentData(TypedDict):
     payment_id: str
     payment_url: Optional[str]
@@ -198,6 +203,14 @@ async def on_purchase_type_select(
     notification_service: FromDishka[NotificationService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    if _is_trial_renew_blocked(user, purchase_type):
+        logger.info(f"{log(user)} Blocked RENEW: user is on trial subscription")
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-trial-renew-not-allowed"),
+        )
+        return
+
     plans: list[PlanDto] = await plan_service.get_available_plans(user)
     gateways = await payment_gateway_service.filter_active()
     dialog_manager.dialog_data["purchase_type"] = purchase_type
@@ -350,6 +363,14 @@ async def on_subscription_plans(  # noqa: C901
         raise ValueError("Callback data is empty")
 
     purchase_type = PurchaseType(callback.data.removeprefix(PURCHASE_PREFIX))
+    if _is_trial_renew_blocked(user, purchase_type):
+        logger.info(f"{log(user)} Blocked RENEW: user is on trial subscription")
+        await notification_service.notify_user(
+            user=user,
+            payload=MessagePayload(i18n_key="ntf-subscription-trial-renew-not-allowed"),
+        )
+        return
+
     dialog_manager.dialog_data["purchase_type"] = purchase_type
 
     dialog_manager.dialog_data.pop(CURRENT_DURATION_KEY, None)
