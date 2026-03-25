@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
 
-WORKDIR /opt/remnashop
+WORKDIR /opt/remnatgseller
 
 RUN apk add --no-cache git
 
@@ -14,7 +14,7 @@ RUN uv sync --locked --no-dev --no-cache --compile-bytecode \
 
 FROM python:3.12-alpine AS final
 
-WORKDIR /opt/remnashop
+WORKDIR /opt/remnatgseller
 
 ARG BUILD_TIME
 ARG BUILD_BRANCH
@@ -26,14 +26,14 @@ ENV BUILD_BRANCH=${BUILD_BRANCH}
 ENV BUILD_COMMIT=${BUILD_COMMIT}
 ENV BUILD_TAG=${BUILD_TAG}
 
-COPY --from=builder /opt/remnashop/.venv /opt/remnashop/.venv
+COPY --from=builder /opt/remnatgseller/.venv /opt/remnatgseller/.venv
 
-ENV PATH="/opt/remnashop/.venv/bin:$PATH"
+ENV PATH="/opt/remnatgseller/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/opt/remnashop
+ENV PYTHONPATH=/opt/remnatgseller
 
 COPY ./src ./src
-COPY ./assets /opt/remnashop/assets.default
+COPY ./assets /opt/remnatgseller/assets.default
 COPY ./docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN chmod +x ./docker-entrypoint.sh

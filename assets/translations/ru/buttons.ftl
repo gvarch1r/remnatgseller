@@ -30,8 +30,7 @@ btn-remnashop-info =
     .release-latest = 👀 Посмотреть
     .how-upgrade = ❓ Как обновить
     .github = ⭐ GitHub
-    .telegram = 👪 Telegram
-    .donate = 💰 Поддержать разработчика
+    .releases = 📦 Релизы
     .guide = ❓ Инструкция
 
 btn-requirement =

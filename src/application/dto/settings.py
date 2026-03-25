@@ -46,7 +46,7 @@ class RequirementSettingsDto(TrackableMixin):
 
     rules_link: SecretStr = SecretStr("https://telegram.org/tos/")
     channel_id: Optional[int] = None
-    channel_link: SecretStr = SecretStr("@remna_shop")
+    channel_link: SecretStr = SecretStr("")
 
     @property
     def rules_url(self) -> str:

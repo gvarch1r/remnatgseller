@@ -7,7 +7,7 @@ from aiogram.utils.formatting import Text
 
 from src.__version__ import __version__
 from src.application.dto import BuildInfoDto, MediaDescriptorDto, MessagePayloadDto
-from src.core.constants import REPOSITORY
+from src.core.constants import REPOSITORY, REPOSITORY_RELEASES
 from src.core.enums import (
     AccessMode,
     MediaType,
@@ -31,6 +31,7 @@ class RemnashopWelcomeEvent(BaseEvent):
 
     version: str = __version__
     repository: str = REPOSITORY
+    releases_url: str = REPOSITORY_RELEASES
 
     @property
     def event_key(self) -> str:

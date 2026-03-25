@@ -14,6 +14,8 @@ URL_PATTERN: Pattern[str] = re.compile(r"^https?://.*$")
 USERNAME_PATTERN: Pattern[str] = re.compile(r"^@[a-zA-Z0-9_]{5,32}$")
 
 REPOSITORY: Final[str] = "https://github.com/gvarch1r/remnatgseller"
+REPOSITORY_RELEASES: Final[str] = f"{REPOSITORY}/releases"
+REMNAWAVE_DOCS: Final[str] = "https://docs.rw/docs"
 T_ME: Final[str] = "https://t.me/"
 API_V1: Final[str] = "/api/v1"
 BOT_WEBHOOK_PATH: Final[str] = "/telegram"

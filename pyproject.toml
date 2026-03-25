@@ -2,7 +2,7 @@
 name = "remnashop"
 version = "0.0.0"
 description = "This is a Telegram bot for selling VPN subscriptions. It works with Remnawave"
-authors = [{ name = "snoups" }]
+authors = [{ name = "gvarch1r" }]
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12,<3.13"
@@ -36,7 +36,7 @@ dependencies = [
 remnapy = { git = "https://github.com/snoups/remnapy", rev = "bec1c72" }
 
 [project.urls]
-homepage = "https://t.me/@remna_shop"
+homepage = "https://github.com/gvarch1r/remnatgseller"
 repository = "https://github.com/gvarch1r/remnatgseller"
 
 [dependency-groups]

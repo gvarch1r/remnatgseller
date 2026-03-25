@@ -1,4 +1,4 @@
-name: Remnashop - Release
+name: Remnatgseller - Release
 
 on:
   # Сборка при push тега v* (git push origin v3.0.0)
@@ -75,9 +75,9 @@ jobs:
           name: ${{ github.ref_name }}
           generate_release_notes: false
           body: |
-            # 🛍 Remnashop ${{ github.ref_name }} 
-            [![Telegram Group](https://img.shields.io/badge/public_group-white?style=social&logo=Telegram&logoColor=blue)](https://t.me/remna_shop)
-            [![Remnawave](https://img.shields.io/badge/remnawave-white?style=social&logo=Telegram&logoColor=blue)](https://t.me/+xQs17zMzwCY1NzYy)
+            # Remnatgseller ${{ github.ref_name }}
+            [![GitHub](https://img.shields.io/badge/GitHub-repo-181717?style=social&logo=github)](https://github.com/${{ github.repository }})
+            [![Releases](https://img.shields.io/badge/Releases-0969da?style=social&logo=github)](https://github.com/${{ github.repository }}/releases)
 
             ---
 

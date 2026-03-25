@@ -9,14 +9,15 @@
 
 **This project is a Telegram bot for selling VPN subscriptions, integrated with Remnawave.**
 
-[![Static Badge](https://img.shields.io/badge/public_group-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsn0ups)](https://t.me/remna_shop)
-[![Static Badge](https://img.shields.io/badge/remnawave-white?style=social&logo=Telegram&logoColor=blue&logoSize=auto&labelColor=white&link=https%3A%2F%2Ft.me%2Fsnoups)](https://t.me/+xQs17zMzwCY1NzYy)
+[![GitHub](https://img.shields.io/badge/GitHub-repo-181717?style=social&logo=github)](https://github.com/gvarch1r/remnatgseller)
+[![Releases](https://img.shields.io/badge/Releases-0969da?style=social&logo=github)](https://github.com/gvarch1r/remnatgseller/releases)
+[![Remnawave](https://img.shields.io/badge/Remnawave-documentation-0969da)](https://docs.rw/docs)
 ![GitHub Repo stars](https://img.shields.io/github/stars/gvarch1r/remnatgseller)
 
 <p align="center">
     <br />
     <p align="center">
-        <a href="https://remnashop.mintlify.app/docs/en/overview/releases">
+        <a href="https://github.com/gvarch1r/remnatgseller/releases">
             <img src="https://img.shields.io/badge/Get%20Started-%E2%86%92-0969da?style=for-the-badge&labelColor=0969da&color=0969da" alt="Get Started" width="200" height="auto">
         </a>
     </p>

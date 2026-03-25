@@ -6,7 +6,7 @@ from .base import BaseConfig
 
 
 class RedisConfig(BaseConfig, env_prefix="REDIS_"):
-    host: str = "remnashop-redis"
+    host: str = "remnatgseller-redis"
     port: int = 6379
     name: str = "0"
     password: Optional[SecretStr] = None
