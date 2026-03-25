@@ -1,5 +1,5 @@
 x-build: &build
-  image: ghcr.io/snoups/remnashop:latest
+  image: ghcr.io/gvarch1r/remnatgseller:latest
 
   volumes:
       - ./logs:/opt/remnashop/logs

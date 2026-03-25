@@ -13,7 +13,7 @@ TAG_REGEX: Pattern[str] = re.compile(r"^[A-Z0-9_]{1,16}$")
 URL_PATTERN: Pattern[str] = re.compile(r"^https?://.*$")
 USERNAME_PATTERN: Pattern[str] = re.compile(r"^@[a-zA-Z0-9_]{5,32}$")
 
-REPOSITORY: Final[str] = "https://github.com/snoups/remnashop"
+REPOSITORY: Final[str] = "https://github.com/gvarch1r/remnatgseller"
 T_ME: Final[str] = "https://t.me/"
 API_V1: Final[str] = "/api/v1"
 BOT_WEBHOOK_PATH: Final[str] = "/telegram"

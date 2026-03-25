@@ -37,7 +37,7 @@ remnapy = { git = "https://github.com/snoups/remnapy", rev = "bec1c72" }
 
 [project.urls]
 homepage = "https://t.me/@remna_shop"
-repository = "https://github.com/snoups/remnashop"
+repository = "https://github.com/gvarch1r/remnatgseller"
 
 [dependency-groups]
 dev = [
