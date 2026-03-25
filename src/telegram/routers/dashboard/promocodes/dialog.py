@@ -27,6 +27,7 @@ from .handlers import (
     on_create_promocode_click,
     on_promocode_code_input,
     on_promocode_delete_confirmed,
+    on_promocode_lifetime_input,
     on_promocode_max_activations_input,
     on_promocode_reward_duration_select,
     on_promocode_reward_input,

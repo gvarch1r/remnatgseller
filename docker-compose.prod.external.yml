@@ -132,10 +132,10 @@ services:
 
 
 networks:
+  # Сеть часто уже создана Remnawave / старым стеком — не создаём заново.
   remnawave-network:
     name: remnawave-network
-    driver: bridge
-    external: false
+    external: true
 
 volumes:
   remnatgseller-db-data:
