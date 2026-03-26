@@ -18,6 +18,7 @@ from remnapy.enums.users import TrafficLimitStrategy
 from src.application.common import Notifier
 from src.application.common.dao import PlanDao
 from src.application.dto import MediaDescriptorDto, MessagePayloadDto, PlanDto, UserDto
+from src.application.services import ExchangeRateFetchError
 from src.application.use_cases.plan.commands.access import (
     AddAllowedUserToPlan,
     AddAllowedUserToPlanDto,
@@ -44,6 +45,10 @@ from src.application.use_cases.plan.commands.edit import (
     UpdatePlanTrafficDto,
     UpdatePlanType,
     UpdatePlanTypeDto,
+)
+from src.application.use_cases.plan.commands.fill_prices_from_rub import (
+    FillPlanPricesFromRub,
+    FillPlanPricesFromRubDto,
 )
 from src.application.use_cases.plan.commands.order import (
     DeletePlan,
@@ -633,6 +638,44 @@ async def on_price_input(
 
     except ValueError:
         await notifier.notify_user(user, i18n_key="ntf-common.invalid-value")
+
+
+@inject
+async def on_fill_prices_from_rub_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    retort: FromDishka[Retort],
+    notifier: FromDishka[Notifier],
+    fill_plan_prices_from_rub: FromDishka[FillPlanPricesFromRub],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+
+    if not message.text:
+        await notifier.notify_user(user, i18n_key="ntf-common.invalid-value")
+        return
+
+    duration_days = dialog_manager.dialog_data.get("selected_duration")
+    if duration_days is None:
+        raise ValueError("Missing selected_duration in dialog data")
+
+    current_plan = retort.load(dialog_manager.dialog_data[PlanDto.__name__], PlanDto)
+
+    try:
+        updated_plan = await fill_plan_prices_from_rub(
+            user,
+            FillPlanPricesFromRubDto(current_plan, duration_days, message.text),
+        )
+    except ExchangeRateFetchError:
+        await notifier.notify_user(user, i18n_key="ntf-plan.rates-unavailable")
+        return
+    except ValueError:
+        await notifier.notify_user(user, i18n_key="ntf-common.invalid-value")
+        return
+
+    dialog_manager.dialog_data[PlanDto.__name__] = retort.dump(updated_plan)
+    await dialog_manager.switch_to(state=RemnashopPlans.PRICES)
 
 
 @inject

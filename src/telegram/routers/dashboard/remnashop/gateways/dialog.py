@@ -22,6 +22,8 @@ from src.telegram.widgets import Banner, I18nFormat, IgnoreUpdate
 
 from .getters import (
     currency_getter,
+    currency_rates_field_getter,
+    currency_rates_getter,
     field_getter,
     gateway_getter,
     gateways_getter,
@@ -29,6 +31,10 @@ from .getters import (
 )
 from .handlers import (
     on_active_toggle,
+    on_clear_usd_rub_override_click,
+    on_currency_rates_field_input,
+    on_currency_rates_override_click,
+    on_currency_rates_stars_click,
     on_default_currency_select,
     on_field_input,
     on_field_select,
@@ -80,6 +86,13 @@ gateways = Window(
             text=I18nFormat("btn-gateway.default-currency"),
             id="default_currency",
             state=RemnashopGateways.CURRENCY,
+        ),
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-gateway.currency-rates"),
+            id="currency_rates",
+            state=RemnashopGateways.CURRENCY_RATES,
         ),
     ),
     Row(
@@ -175,6 +188,58 @@ default_currency = Window(
     getter=currency_getter,
 )
 
+currency_rates = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat(
+        "msg-gateways-currency-rates",
+        stars_per_usd=F["stars_per_usd"],
+        usd_rub_override=F["usd_rub_override"],
+    ),
+    Column(
+        Button(
+            text=I18nFormat("btn-gateway.currency-rates-stars"),
+            id="cr_stars",
+            on_click=on_currency_rates_stars_click,
+        ),
+        Button(
+            text=I18nFormat("btn-gateway.currency-rates-override"),
+            id="cr_override",
+            on_click=on_currency_rates_override_click,
+        ),
+        Button(
+            text=I18nFormat("btn-gateway.currency-rates-clear-override"),
+            id="cr_clear_override",
+            on_click=on_clear_usd_rub_override_click,
+        ),
+    ),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back.general"),
+            id="back",
+            state=RemnashopGateways.MAIN,
+        ),
+    ),
+    IgnoreUpdate(),
+    state=RemnashopGateways.CURRENCY_RATES,
+    getter=currency_rates_getter,
+)
+
+currency_rates_field = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-gateways-currency-rates-input", field=F["currency_rates_field"]),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back.general"),
+            id="back",
+            state=RemnashopGateways.CURRENCY_RATES,
+        ),
+    ),
+    MessageInput(func=on_currency_rates_field_input),
+    IgnoreUpdate(),
+    state=RemnashopGateways.CURRENCY_RATES_FIELD,
+    getter=currency_rates_field_getter,
+)
+
 placement = Window(
     Banner(BannerName.DASHBOARD),
     I18nFormat("msg-gateways-placement"),
@@ -211,5 +276,7 @@ router = Dialog(
     gateway_settings,
     gateway_field,
     default_currency,
+    currency_rates,
+    currency_rates_field,
     placement,
 )

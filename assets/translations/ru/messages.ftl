@@ -805,6 +805,27 @@ msg-menu-editor-button-payload =
 msg-gateways-main = <b>🌐 Платежные системы</b>
 msg-gateways-settings = <b>🌐 Конфигурация { gateway-type }</b>
 msg-gateways-default-currency = <b>💸 Валюта по умолчанию</b>
+msg-gateways-currency-rates =
+    <b>💱 Авто-курсы для цен (из ₽)</b>
+
+    <blockquote>
+    • <b>★ на 1 USD</b>: { $stars_per_usd }
+    • <b>Фикс ₽ за 1 USD</b>: { $usd_rub_override } <i>(если «—», курс с ЦБ)</i>
+    </blockquote>
+
+    Выберите, что изменить.
+
+msg-gateways-currency-rates-input =
+    { $field ->
+        [stars_per_usd] <b>★ на 1 USD</b>
+
+        Введите целое число (не меньше 1).
+        [usd_rub_override] <b>Фикс: сколько ₽ за 1 USD</b>
+
+        Введите положительное число. Чтобы снова брать курс с ЦБ — кнопка «Сбросить» или введите <code>-</code> / <code>сброс</code>.
+       *[other] <b>Параметр</b>
+    }
+
 msg-gateways-placement = <b>🔢 Изменить позиционирование</b>
 
 msg-gateways-field =
@@ -1013,6 +1034,16 @@ msg-plan-prices =
         })</b>
 
     Выберите валюту с ценой для изменения.
+
+msg-plan-fill-from-rub =
+    <b>💱 Заполнить из рублей ({ $value ->
+            [0] { unlimited }
+            *[other] { unit-day }
+        })</b>
+
+    Введите сумму в <b>₽</b>. Бот проставит цены в <b>USD</b> (для крипто-шлюзов это же число), в <b>★</b> и пересчитает ₽ с округлением по правилам бота.
+
+    Курс USD и множитель звёзд настраиваются в <b>Платёжные системы → Авто-курсы для цен</b>.
 
 msg-plan-price =
     <b>💰 Изменить цену для длительности ({ $value ->

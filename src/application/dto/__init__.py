@@ -15,6 +15,7 @@ from .promocode import PromocodeDto
 from .referral import ReferralDto, ReferralRewardDto
 from .settings import (
     AccessSettingsDto,
+    CurrencyRatesSettingsDto,
     MenuButtonDto,
     MenuSettingsDto,
     NotificationsSettingsDto,
@@ -67,6 +68,7 @@ __all__ = [
     "ReferralDto",
     "ReferralRewardDto",
     "AccessSettingsDto",
+    "CurrencyRatesSettingsDto",
     "MenuButtonDto",
     "MenuSettingsDto",
     "NotificationsSettingsDto",

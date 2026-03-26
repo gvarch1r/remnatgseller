@@ -34,6 +34,7 @@ from .getters import (
     internal_squads_getter,
     name_getter,
     plans_getter,
+    price_from_rub_getter,
     price_getter,
     prices_getter,
     squads_getter,
@@ -64,6 +65,7 @@ from .handlers import (
     on_plan_delete,
     on_plan_move,
     on_plan_select,
+    on_fill_prices_from_rub_input,
     on_price_input,
     on_squads,
     on_strategy_select,
@@ -554,6 +556,13 @@ prices = Window(
     ),
     Row(
         SwitchTo(
+            text=I18nFormat("btn-plans.fill-from-rub"),
+            id="fill_from_rub",
+            state=RemnashopPlans.PRICE_FROM_RUB,
+        ),
+    ),
+    Row(
+        SwitchTo(
             text=I18nFormat("btn-back.general"),
             id="back",
             state=RemnashopPlans.DURATIONS,
@@ -562,6 +571,22 @@ prices = Window(
     IgnoreUpdate(),
     state=RemnashopPlans.PRICES,
     getter=prices_getter,
+)
+
+price_from_rub = Window(
+    Banner(BannerName.DASHBOARD),
+    I18nFormat("msg-plan-fill-from-rub", value=F["duration"]),
+    Row(
+        SwitchTo(
+            text=I18nFormat("btn-back.general"),
+            id="back",
+            state=RemnashopPlans.PRICES,
+        ),
+    ),
+    MessageInput(func=on_fill_prices_from_rub_input),
+    IgnoreUpdate(),
+    state=RemnashopPlans.PRICE_FROM_RUB,
+    getter=price_from_rub_getter,
 )
 
 price = Window(
@@ -714,6 +739,7 @@ router = Dialog(
     durations,
     durations_add,
     prices,
+    price_from_rub,
     price,
     allowed_users,
     squads,

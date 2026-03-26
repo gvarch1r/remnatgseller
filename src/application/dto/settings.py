@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Optional
 
 from pydantic import SecretStr
@@ -137,6 +138,14 @@ class MenuSettingsDto(TrackableMixin):
 
 
 @dataclass(kw_only=True)
+class CurrencyRatesSettingsDto(TrackableMixin):
+    """Параметры «Заполнить из ₽» в редакторе планов."""
+
+    stars_per_usd: Decimal = field(default_factory=lambda: Decimal("77"))
+    usd_rub_override: Optional[Decimal] = None
+
+
+@dataclass(kw_only=True)
 class SettingsDto(BaseDto, TrackableMixin, TimestampMixin):
     default_currency: Currency = Currency.XTR
     access: AccessSettingsDto = field(default_factory=AccessSettingsDto)
@@ -144,3 +153,4 @@ class SettingsDto(BaseDto, TrackableMixin, TimestampMixin):
     notifications: NotificationsSettingsDto = field(default_factory=NotificationsSettingsDto)
     referral: ReferralSettingsDto = field(default_factory=ReferralSettingsDto)
     menu: MenuSettingsDto = field(default_factory=MenuSettingsDto)
+    currency_rates: CurrencyRatesSettingsDto = field(default_factory=CurrencyRatesSettingsDto)

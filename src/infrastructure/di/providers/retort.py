@@ -19,6 +19,7 @@ from pydantic import SecretStr, TypeAdapter
 from src.application.common import Cryptographer
 from src.application.dto import (
     AccessSettingsDto,
+    CurrencyRatesSettingsDto,
     MenuButtonDto,
     MenuSettingsDto,
     MessagePayloadDto,
@@ -133,6 +134,9 @@ class RetortProvider(Provider):
                     dict, NotificationsSettingsDto, retort.get_loader(NotificationsSettingsDto)
                 ),
                 coercer(dict, ReferralSettingsDto, retort.get_loader(ReferralSettingsDto)),
+                coercer(
+                    dict, CurrencyRatesSettingsDto, retort.get_loader(CurrencyRatesSettingsDto)
+                ),
                 coercer(dict, MenuSettingsDto, retort.get_loader(MenuSettingsDto)),
                 coercer(dict, MenuButtonDto, retort.get_loader(MenuButtonDto)),
                 #

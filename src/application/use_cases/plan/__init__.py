@@ -14,6 +14,7 @@ from .commands.edit import (
     UpdatePlanTraffic,
     UpdatePlanType,
 )
+from .commands.fill_prices_from_rub import FillPlanPricesFromRub
 from .commands.order import DeletePlan, MoveDurationUp, MovePlanUp
 from .exchange import ExportPlans, ParsePlansImport
 from .queries.match import MatchPlan
@@ -29,6 +30,7 @@ PLAN_USE_CASES: Final[tuple[type[Interactor], ...]] = (
     UpdatePlanDevice,
     UpdatePlanName,
     UpdatePlanPrice,
+    FillPlanPricesFromRub,
     UpdatePlanTag,
     UpdatePlanTraffic,
     UpdatePlanType,

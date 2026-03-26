@@ -130,6 +130,8 @@ class RemnashopGateways(StatesGroup):
     SETTINGS = State()
     FIELD = State()
     CURRENCY = State()
+    CURRENCY_RATES = State()
+    CURRENCY_RATES_FIELD = State()
     PLACEMENT = State()
 
 
@@ -154,6 +156,7 @@ class RemnashopPlans(StatesGroup):
     DURATIONS = State()
     DURATION_ADD = State()
     PRICES = State()
+    PRICE_FROM_RUB = State()
     PRICE = State()
     ALLOWED = State()
     SQUADS = State()

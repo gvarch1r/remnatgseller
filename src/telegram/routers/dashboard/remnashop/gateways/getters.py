@@ -5,7 +5,7 @@ from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 
 from src.application.common.dao import PaymentGatewayDao, SettingsDao
-from src.application.dto import PaymentGatewayDto
+from src.application.dto import CurrencyRatesSettingsDto, PaymentGatewayDto
 from src.core.config import AppConfig
 from src.core.enums import Currency
 
@@ -98,6 +98,33 @@ async def currency_getter(
             for currency in Currency
         ]
     }
+
+
+def _format_override(cr: CurrencyRatesSettingsDto) -> str:
+    if cr.usd_rub_override is None:
+        return "—"
+    return str(cr.usd_rub_override)
+
+
+@inject
+async def currency_rates_getter(
+    dialog_manager: DialogManager,
+    settings_dao: FromDishka[SettingsDao],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    settings = await settings_dao.get()
+    cr = settings.currency_rates
+    return {
+        "stars_per_usd": str(cr.stars_per_usd),
+        "usd_rub_override": _format_override(cr),
+    }
+
+
+async def currency_rates_field_getter(
+    dialog_manager: DialogManager,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    return {"currency_rates_field": dialog_manager.dialog_data["currency_rates_field"]}
 
 
 @inject

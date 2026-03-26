@@ -16,7 +16,11 @@ from src.application.use_cases.gateways.commands.configuration import (
     UpdatePaymentGatewaySettingsDto,
 )
 from src.application.use_cases.gateways.commands.payment import CreateTestPayment
-from src.application.use_cases.settings.commands.currency import UpdateDefaultCurrency
+from src.application.use_cases.settings.commands.currency import (
+    UpdateCurrencyRatesField,
+    UpdateCurrencyRatesFieldDto,
+    UpdateDefaultCurrency,
+)
 from src.core.constants import USER_KEY
 from src.core.enums import Currency
 from src.core.exceptions import GatewayNotConfiguredError
@@ -160,6 +164,69 @@ async def on_default_currency_select(
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     await update_default_currency(user, selected_currency)
+
+
+async def on_currency_rates_stars_click(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+) -> None:
+    dialog_manager.dialog_data["currency_rates_field"] = "stars_per_usd"
+    await dialog_manager.switch_to(state=RemnashopGateways.CURRENCY_RATES_FIELD)
+
+
+async def on_currency_rates_override_click(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+) -> None:
+    dialog_manager.dialog_data["currency_rates_field"] = "usd_rub_override"
+    await dialog_manager.switch_to(state=RemnashopGateways.CURRENCY_RATES_FIELD)
+
+
+@inject
+async def on_clear_usd_rub_override_click(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    update_currency_rates_field: FromDishka[UpdateCurrencyRatesField],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    await update_currency_rates_field(
+        user,
+        UpdateCurrencyRatesFieldDto(field="usd_rub_override", value=""),
+    )
+    await dialog_manager.switch_to(state=RemnashopGateways.CURRENCY_RATES)
+
+
+@inject
+async def on_currency_rates_field_input(
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    notifier: FromDishka[Notifier],
+    update_currency_rates_field: FromDishka[UpdateCurrencyRatesField],
+) -> None:
+    dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    field = dialog_manager.dialog_data.get("currency_rates_field")
+    if field not in ("stars_per_usd", "usd_rub_override"):
+        raise ValueError("Invalid currency_rates_field in dialog data")
+
+    if not message.text:
+        await notifier.notify_user(user, i18n_key="ntf-settings.currency-rates-invalid")
+        return
+
+    try:
+        await update_currency_rates_field(
+            user,
+            UpdateCurrencyRatesFieldDto(field=field, value=message.text),
+        )
+    except ValueError:
+        await notifier.notify_user(user, i18n_key="ntf-settings.currency-rates-invalid")
+        return
+
+    await dialog_manager.switch_to(state=RemnashopGateways.CURRENCY_RATES)
 
 
 @inject

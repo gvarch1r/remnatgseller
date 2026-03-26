@@ -249,6 +249,10 @@ async def price_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str
     }
 
 
+async def price_from_rub_getter(dialog_manager: DialogManager, **kwargs: Any) -> dict[str, Any]:
+    return {"duration": dialog_manager.dialog_data.get("selected_duration")}
+
+
 @inject
 async def allowed_users_getter(
     dialog_manager: DialogManager,

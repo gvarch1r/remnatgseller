@@ -10,6 +10,7 @@ from src.application.common import (
 )
 from src.application.services import (
     BotService,
+    CbrUsdRubProvider,
     CommandService,
     NotificationService,
     PricingService,
@@ -32,6 +33,7 @@ class ServicesProvider(Provider):
     cryptographer = provide(source=CryptographerImpl, provides=Cryptographer)
     redirect = provide(source=RedirectImpl, provides=Redirect)
     pricing = provide(source=PricingService)
+    cbr_usd_rub = provide(source=CbrUsdRubProvider)
 
     event_bus = provide(EventBusImpl)
     publisher = alias(source=EventBusImpl, provides=EventPublisher)
