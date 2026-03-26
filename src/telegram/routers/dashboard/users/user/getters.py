@@ -30,6 +30,7 @@ from src.core.utils.i18n_helpers import (
     i18n_format_traffic_limit,
 )
 from src.core.utils.i18n_keys import ByteUnitKey
+from src.core.utils.squads import resolve_squad_uuid
 
 
 @inject
@@ -226,12 +227,20 @@ async def squads_getter(
 
     internal_resp, external_resp = await asyncio.gather(internal_task, external_task)
 
-    internal_dict = {s.uuid: s.name for s in internal_resp.internal_squads}
+    internal_dict = {
+        uid: s.name
+        for s in internal_resp.internal_squads
+        if (uid := resolve_squad_uuid(s)) is not None
+    }
     internal_names = ", ".join(
         internal_dict.get(uuid, str(uuid)) for uuid in subscription.internal_squads
     )
 
-    external_dict = {s.uuid: s.name for s in external_resp.external_squads}
+    external_dict = {
+        uid: s.name
+        for s in external_resp.external_squads
+        if (uid := resolve_squad_uuid(s)) is not None
+    }
     external_name = (
         external_dict.get(subscription.external_squad) if subscription.external_squad else None
     )
@@ -259,11 +268,12 @@ async def internal_squads_getter(
 
     squads = [
         {
-            "uuid": squad.uuid,
+            "uuid": uid,
             "name": squad.name,
-            "selected": True if squad.uuid in subscription.internal_squads else False,
+            "selected": True if uid in subscription.internal_squads else False,
         }
         for squad in result.internal_squads
+        if (uid := resolve_squad_uuid(squad)) is not None
     ]
 
     return {"squads": squads}
@@ -283,18 +293,21 @@ async def external_squads_getter(
         raise ValueError(f"Current subscription for user '{target_telegram_id}' not found")
 
     result = await remnawave_sdk.external_squads.get_external_squads()
-    existing_squad_uuids = {squad.uuid for squad in result.external_squads}
+    existing_squad_uuids = {
+        uid for squad in result.external_squads if (uid := resolve_squad_uuid(squad)) is not None
+    }
 
     if subscription.external_squad and subscription.external_squad not in existing_squad_uuids:
         subscription.external_squad = None
 
     squads = [
         {
-            "uuid": squad.uuid,
+            "uuid": uid,
             "name": squad.name,
-            "selected": True if squad.uuid == subscription.external_squad else False,
+            "selected": True if uid == subscription.external_squad else False,
         }
         for squad in result.external_squads
+        if (uid := resolve_squad_uuid(squad)) is not None
     ]
 
     return {"squads": squads}

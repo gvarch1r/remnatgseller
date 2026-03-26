@@ -5,6 +5,8 @@ from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from remnapy import RemnawaveSDK
 
+from src.core.utils.squads import resolve_squad_uuid
+
 
 async def from_xui_getter(
     dialog_manager: DialogManager,
@@ -36,11 +38,12 @@ async def squads_getter(
 
     squads = [
         {
-            "uuid": str(squad.uuid),
+            "uuid": str(uid),
             "name": squad.name,
-            "selected": True if str(squad.uuid) in selected_squads else False,
+            "selected": True if str(uid) in selected_squads else False,
         }
         for squad in result.internal_squads
+        if (uid := resolve_squad_uuid(squad)) is not None
     ]
 
     return {"squads": squads}

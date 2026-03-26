@@ -13,6 +13,7 @@ from src.application.common.dao import PlanDao
 from src.application.dto import PlanDto, PlanDurationDto, PlanPriceDto
 from src.application.services import BotService
 from src.core.enums import Currency, PlanAvailability, PlanType
+from src.core.utils.squads import resolve_squad_uuid
 
 
 @inject
@@ -273,7 +274,11 @@ async def squads_getter(
     plan = retort.load(dialog_manager.dialog_data[PlanDto.__name__], PlanDto)
 
     internal_response = await remnawave_sdk.internal_squads.get_internal_squads()
-    internal_dict = {s.uuid: s.name for s in internal_response.internal_squads}
+    internal_dict = {
+        uid: s.name
+        for s in internal_response.internal_squads
+        if (uid := resolve_squad_uuid(s)) is not None
+    }
 
     if not plan.internal_squads:
         internal_squads_data: Union[str, bool] = False
@@ -283,7 +288,11 @@ async def squads_getter(
         )
 
     external_response = await remnawave_sdk.external_squads.get_external_squads()
-    external_dict = {s.uuid: s.name for s in external_response.external_squads}
+    external_dict = {
+        uid: s.name
+        for s in external_response.external_squads
+        if (uid := resolve_squad_uuid(s)) is not None
+    }
     external_squad_data = external_dict.get(plan.external_squad) if plan.external_squad else False
 
     return {
@@ -302,7 +311,9 @@ async def internal_squads_getter(
     plan = retort.load(dialog_manager.dialog_data[PlanDto.__name__], PlanDto)
 
     result = await remnawave_sdk.internal_squads.get_internal_squads()
-    existing_squad_uuids = {squad.uuid for squad in result.internal_squads}
+    existing_squad_uuids = {
+        uid for squad in result.internal_squads if (uid := resolve_squad_uuid(squad)) is not None
+    }
 
     if plan.internal_squads:
         plan_squad_uuids_set = set(plan.internal_squads)
@@ -313,11 +324,12 @@ async def internal_squads_getter(
 
     squads = [
         {
-            "uuid": squad.uuid,
+            "uuid": uid,
             "name": squad.name,
-            "selected": True if squad.uuid in plan.internal_squads else False,
+            "selected": True if uid in plan.internal_squads else False,
         }
         for squad in result.internal_squads
+        if (uid := resolve_squad_uuid(squad)) is not None
     ]
 
     return {
@@ -335,7 +347,9 @@ async def external_squads_getter(
     plan = retort.load(dialog_manager.dialog_data[PlanDto.__name__], PlanDto)
 
     result = await remnawave_sdk.external_squads.get_external_squads()
-    existing_squad_uuids = {squad.uuid for squad in result.external_squads}
+    existing_squad_uuids = {
+        uid for squad in result.external_squads if (uid := resolve_squad_uuid(squad)) is not None
+    }
 
     if plan.external_squad and plan.external_squad not in existing_squad_uuids:
         plan.external_squad = None
@@ -344,11 +358,12 @@ async def external_squads_getter(
 
     squads = [
         {
-            "uuid": squad.uuid,
+            "uuid": uid,
             "name": squad.name,
-            "selected": True if squad.uuid == plan.external_squad else False,
+            "selected": True if uid == plan.external_squad else False,
         }
         for squad in result.external_squads
+        if (uid := resolve_squad_uuid(squad)) is not None
     ]
 
     return {
