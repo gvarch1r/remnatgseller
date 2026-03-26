@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
+from uuid import UUID
 
 from loguru import logger
 from remnapy import RemnawaveSDK
@@ -12,6 +13,44 @@ from src.application.common.policy import Permission
 from src.application.dto import SubscriptionDto, UserDto
 from src.core.config import AppConfig
 from src.core.types import RemnaUserDto
+
+
+def _unwrap_remnawave_json(data: Any) -> Any:
+    if isinstance(data, dict) and "response" in data:
+        return data["response"]
+    return data
+
+
+async def fetch_external_squad_by_uuid(
+    sdk: RemnawaveSDK,
+    squad_uuid: UUID,
+) -> Optional[GetExternalSquadByUuidResponseDto]:
+    """
+    remnapy: get_external_squad_by_uuid объявляет uuid без Path(), rapid_api_client не
+    подставляет сегмент — KeyError 'uuid'. Обходим прямым GET.
+    """
+    uid = str(squad_uuid)
+    try:
+        return await sdk.external_squads.get_external_squad_by_uuid(uid)
+    except KeyError:
+        logger.debug(
+            "Using direct GET /external-squads/{} (remnapy path param bug)",
+            uid,
+        )
+    except Exception as e:
+        logger.warning("external_squad SDK call failed for {}: {}", uid, e)
+        return None
+
+    try:
+        response = await sdk._client.get(f"/external-squads/{uid}")
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        payload = _unwrap_remnawave_json(response.json())
+        return GetExternalSquadByUuidResponseDto.model_validate(payload)
+    except Exception as e:
+        logger.warning("external_squad direct GET failed for {}: {}", uid, e)
+        return None
 
 
 @dataclass(frozen=True)
@@ -121,8 +160,9 @@ class GetUserProfileSubscription(Interactor[int, GetUserProfileSubscriptionResul
 
         external_squad = None
         if remna_user.external_squad_uuid:
-            external_squad = await self.remnawave_sdk.external_squads.get_external_squad_by_uuid(
-                remna_user.external_squad_uuid
+            external_squad = await fetch_external_squad_by_uuid(
+                self.remnawave_sdk,
+                remna_user.external_squad_uuid,
             )
 
         return GetUserProfileSubscriptionResultDto(
