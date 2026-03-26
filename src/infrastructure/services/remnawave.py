@@ -1,8 +1,9 @@
 from dataclasses import fields, is_dataclass
-from typing import Optional, Union
+from typing import Any, Optional, Union
 from uuid import UUID
 
 from loguru import logger
+from pydantic import ValidationError
 from remnapy import RemnawaveSDK
 from remnapy.exceptions import AuthenticationError, ConflictError, NetworkError, NotFoundError
 from remnapy.models import (
@@ -19,6 +20,40 @@ from src.application.common.remnawave import T
 from src.application.dto import PlanSnapshotDto, RemnaSubscriptionDto, SubscriptionDto, UserDto
 from src.core.enums import SubscriptionStatus
 from src.core.utils.converters import days_to_datetime, gb_to_bytes
+
+
+def _unwrap_remnawave_response_body(data: Any) -> Any:
+    if isinstance(data, dict) and "response" in data:
+        return data["response"]
+    return data
+
+
+def _normalize_active_internal_squads_in_user_payload(data: dict[str, Any]) -> dict[str, Any]:
+    """Нормализует activeInternalSquads под UserResponseDto (uuid+name), если панель отдаёт иначе."""
+    raw = data.get("activeInternalSquads")
+    if not isinstance(raw, list):
+        return data
+    fixed: list[dict[str, str]] = []
+    for item in raw:
+        if isinstance(item, str):
+            fixed.append({"uuid": item, "name": item})
+            continue
+        if not isinstance(item, dict):
+            continue
+        uid = (
+            item.get("uuid")
+            or item.get("id")
+            or item.get("squadUuid")
+            or item.get("squad_uuid")
+        )
+        if uid is None:
+            logger.warning("Skipping internal squad entry without uuid: {}", item)
+            continue
+        name = item.get("name") or str(uid)
+        fixed.append({"uuid": str(uid), "name": str(name)})
+    out = dict(data)
+    out["activeInternalSquads"] = fixed
+    return out
 
 
 class RemnawaveImpl(Remnawave):
@@ -115,6 +150,27 @@ class RemnawaveImpl(Remnawave):
         except NotFoundError:
             logger.debug(f"RemnaUser '{uuid}' not found in panel")
             return None
+        except (ValidationError, KeyError, ValueError, TypeError) as e:
+            logger.warning(
+                "Remna user '{}' response parse failed ({}), retrying with squad normalization",
+                uuid,
+                e,
+            )
+            remna_user = await self._fetch_user_by_uuid_with_normalized_squads(uuid)
+            if remna_user is not None:
+                logger.info(f"Fetched RemnaUser '{uuid}' from panel (normalized squads)")
+            return remna_user
+
+    async def _fetch_user_by_uuid_with_normalized_squads(self, uuid: UUID) -> Optional[UserResponseDto]:
+        response = await self.sdk._client.get(f"/users/{uuid}")
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        payload = _unwrap_remnawave_response_body(response.json())
+        if not isinstance(payload, dict):
+            raise TypeError(f"Expected user JSON object, got {type(payload)}")
+        normalized = _normalize_active_internal_squads_in_user_payload(payload)
+        return UserResponseDto.model_validate(normalized)
 
     async def get_user_by_telegram_id(self, telegram_id: int) -> list[UserResponseDto]:
         response = await self.sdk.users.get_users_by_telegram_id(telegram_id)

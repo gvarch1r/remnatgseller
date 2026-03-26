@@ -119,6 +119,7 @@ class GetUserProfileSubscription(Interactor[int, GetUserProfileSubscriptionResul
 
         logger.info(f"{actor.log} Viewed subscription details for '{telegram_id}'")
 
+        external_squad = None
         if remna_user.external_squad_uuid:
             external_squad = await self.remnawave_sdk.external_squads.get_external_squad_by_uuid(
                 remna_user.external_squad_uuid
@@ -128,7 +129,7 @@ class GetUserProfileSubscription(Interactor[int, GetUserProfileSubscriptionResul
             subscription=subscription,
             remna_user=remna_user,
             last_node_name=last_node.name if last_node else None,
-            external_squad=external_squad if remna_user.external_squad_uuid else None,
+            external_squad=external_squad,
         )
 
 

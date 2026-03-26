@@ -120,7 +120,7 @@ async def subscription_getter(
             if remna_user.user_traffic.online_at
             else False
         ),
-        "node_name": user_profile_subscription.last_node_name,
+        "node_name": user_profile_subscription.last_node_name or "—",
         #
         "is_trial_plan": subscription.plan_snapshot.is_trial,
         "plan_name": subscription.plan_snapshot.name,
