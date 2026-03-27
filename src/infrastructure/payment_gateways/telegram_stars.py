@@ -7,7 +7,7 @@ from fastapi import Request
 from loguru import logger
 
 from src.application.dto import PaymentResultDto
-from src.core.enums import TransactionStatus
+from src.core.enums import Currency, TransactionStatus
 
 from .base import BasePaymentGateway
 
@@ -15,16 +15,27 @@ from .base import BasePaymentGateway
 # https://core.telegram.org/api/stars/
 class TelegramStarsGateway(BasePaymentGateway):
     async def handle_create_payment(self, amount: Decimal, details: str) -> PaymentResultDto:
-        prices = [LabeledPrice(label=self.data.currency, amount=int(amount))]
         payment_id = uuid.uuid4()
+        currency_code = (
+            self.data.currency.value
+            if isinstance(self.data.currency, Currency)
+            else str(self.data.currency)
+        )
+        text = details.strip()
+        title = (text[:32] if text else "VPN")[:32]
+        description = (text[:255] if text else title)[:255]
+        # Single line item for XTR: label is shown to the user, not the ISO currency code.
+        item_label = (text[:128] if text else title)[:128]
+        prices = [LabeledPrice(label=item_label, amount=int(amount))]
 
         try:
             payment_url = await self.bot.create_invoice_link(
-                title=details[:32],
-                description=details[:255],
+                title=title,
+                description=description,
                 payload=str(payment_id),
-                currency=self.data.currency,
+                currency=currency_code,
                 prices=prices,
+                provider_token="",
             )
 
             return PaymentResultDto(id=payment_id, url=payment_url)
