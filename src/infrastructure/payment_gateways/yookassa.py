@@ -50,11 +50,14 @@ class YookassaGateway(BasePaymentGateway):
                 f"got {type(self.data.settings).__name__}"
             )
 
+        # httpx BasicAuth uses b":".join(to_bytes(user), to_bytes(pw)); to_bytes() only
+        # accepts str|bytes — int shop_id is returned as-is and breaks join (TypeError).
+        shop_id = self.data.settings.shop_id
         self._client = self._make_client(
             base_url=self.API_BASE,
             auth=(
-                self.data.settings.shop_id,
-                self.data.settings.api_key.get_secret_value(),  # type: ignore [arg-type, union-attr]
+                str(shop_id),  # type: ignore[arg-type]
+                self.data.settings.api_key.get_secret_value(),  # type: ignore[union-attr]
             ),
         )
 
