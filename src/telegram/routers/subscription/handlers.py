@@ -38,7 +38,13 @@ from src.application.use_cases.plan.queries.match import MatchPlan, MatchPlanDto
 from src.application.use_cases.subscription.commands.promocode import ActivatePromocode, ActivatePromocodeDto
 from src.application.use_cases.user.queries.plans import GetAvailablePlans
 from src.core.constants import PAYMENT_PREFIX, USER_KEY
-from src.core.enums import PaymentGatewayType, PurchaseType, TransactionStatus
+from src.core.enums import (
+    PaymentGatewayType,
+    PurchaseType,
+    TransactionStatus,
+    ensure_payment_gateway_type,
+    ensure_purchase_type,
+)
 from src.core.utils.rate_limit import is_rate_limited
 from src.telegram.states import Subscription
 
@@ -62,12 +68,14 @@ class CachedPaymentData(TypedDict):
     final_pricing: str
 
 
-def _get_cache_key(duration: int, gateway_type: PaymentGatewayType) -> str:
-    return f"{duration}:{gateway_type.value}"
+def _get_cache_key(duration: int, gateway_type: PaymentGatewayType | str) -> str:
+    gt = ensure_payment_gateway_type(gateway_type)
+    return f"{duration}:{gt.value}"
 
 
-def _get_addon_cache_key(device_count: int, gateway_type: PaymentGatewayType) -> str:
-    return f"addon:{device_count}:{gateway_type.value}"
+def _get_addon_cache_key(device_count: int, gateway_type: PaymentGatewayType | str) -> str:
+    gt = ensure_payment_gateway_type(gateway_type)
+    return f"addon:{device_count}:{gt.value}"
 
 
 def _load_payment_data(dialog_manager: DialogManager) -> dict[str, CachedPaymentData]:
@@ -96,7 +104,7 @@ async def _create_payment_and_get_data(
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     duration = plan.get_duration(duration_days)
     payment_gateway = await payment_gateway_dao.get_by_type(gateway_type)
-    purchase_type: PurchaseType = dialog_manager.dialog_data["purchase_type"]
+    purchase_type = ensure_purchase_type(dialog_manager.dialog_data["purchase_type"])
 
     if not duration or not payment_gateway:
         logger.error(f"{user.log} Failed to find duration or gateway for payment creation")
@@ -580,18 +588,22 @@ async def on_payment_method_select(
     create_payment: FromDishka[CreatePayment],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
-    logger.info(f"{user.log} Selected payment method '{selected_payment_method}'")
+    gt = ensure_payment_gateway_type(selected_payment_method)
+    logger.info(f"{user.log} Selected payment method '{gt}'")
 
-    dialog_manager.dialog_data[CURRENT_METHOD_KEY] = selected_payment_method
+    dialog_manager.dialog_data[CURRENT_METHOD_KEY] = gt
     cache = _load_payment_data(dialog_manager)
-    purchase_type = dialog_manager.dialog_data.get("purchase_type")
+    purchase_type_raw = dialog_manager.dialog_data.get("purchase_type")
+    purchase_type = (
+        ensure_purchase_type(purchase_type_raw) if purchase_type_raw is not None else None
+    )
 
     if purchase_type == PurchaseType.ADD_DEVICES:
         raw_addon = dialog_manager.dialog_data.get(DeviceAddonDto.__name__)
         addon = retort.load(raw_addon, DeviceAddonDto) if raw_addon else None
         if not addon:
             raise ValueError("DeviceAddonDto not found in dialog data")
-        cache_key = _get_addon_cache_key(addon.device_count, selected_payment_method)
+        cache_key = _get_addon_cache_key(addon.device_count, gt)
         if cache_key in cache:
             _save_payment_data(dialog_manager, cache[cache_key])
             await dialog_manager.switch_to(state=Subscription.CONFIRM)
@@ -599,7 +611,7 @@ async def on_payment_method_select(
         payment_data = await _create_payment_add_devices(
             dialog_manager=dialog_manager,
             device_addon=addon,
-            gateway_type=selected_payment_method,
+            gateway_type=gt,
             retort=retort,
             payment_gateway_dao=payment_gateway_dao,
             notifier=notifier,
@@ -613,7 +625,7 @@ async def on_payment_method_select(
         return
 
     selected_duration = dialog_manager.dialog_data[CURRENT_DURATION_KEY]
-    cache_key = _get_cache_key(selected_duration, selected_payment_method)
+    cache_key = _get_cache_key(selected_duration, gt)
 
     if cache_key in cache:
         logger.info(f"{user.log} Re-selected same method and duration")
@@ -633,7 +645,7 @@ async def on_payment_method_select(
         dialog_manager=dialog_manager,
         plan=plan,
         duration_days=selected_duration,
-        gateway_type=selected_payment_method,
+        gateway_type=gt,
         retort=retort,
         payment_gateway_dao=payment_gateway_dao,
         notifier=notifier,

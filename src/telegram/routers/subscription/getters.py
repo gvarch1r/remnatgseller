@@ -14,7 +14,7 @@ from src.application.services import PricingService
 from src.application.use_cases.plan.queries.match import MatchPlan, MatchPlanDto
 from src.application.use_cases.user.queries.plans import GetAvailablePlans
 from src.core.config import AppConfig
-from src.core.enums import PurchaseType
+from src.core.enums import PurchaseType, ensure_payment_gateway_type, ensure_purchase_type
 from src.core.utils.i18n_helpers import (
     i18n_format_days,
     i18n_format_device_limit,
@@ -297,8 +297,13 @@ async def confirm_getter(
     payment_gateway_dao: FromDishka[PaymentGatewayDao],
     **kwargs: Any,
 ) -> dict[str, Any]:
-    purchase_type = dialog_manager.dialog_data.get("purchase_type")
-    selected_payment_method = dialog_manager.dialog_data["selected_payment_method"]
+    purchase_type_raw = dialog_manager.dialog_data.get("purchase_type")
+    purchase_type = (
+        ensure_purchase_type(purchase_type_raw) if purchase_type_raw is not None else None
+    )
+    selected_payment_method = ensure_payment_gateway_type(
+        dialog_manager.dialog_data["selected_payment_method"]
+    )
     payment_gateway = await payment_gateway_dao.get_by_type(selected_payment_method)
     result_url = dialog_manager.dialog_data["payment_url"]
     pricing_data = dialog_manager.dialog_data["final_pricing"]

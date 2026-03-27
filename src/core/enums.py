@@ -373,3 +373,22 @@ class LogLevel(UpperStrEnum):
     INFO = auto()
     DEBUG = auto()
     NOTSET = auto()
+
+
+def ensure_payment_gateway_type(value: PaymentGatewayType | str) -> PaymentGatewayType:
+    """Диалог/Redis могут отдать строку вместо enum после сериализации состояния."""
+    if isinstance(value, PaymentGatewayType):
+        return value
+    return PaymentGatewayType(value)
+
+
+def ensure_purchase_type(value: PurchaseType | str) -> PurchaseType:
+    if isinstance(value, PurchaseType):
+        return value
+    return PurchaseType(value)
+
+
+def ensure_currency(value: Currency | str) -> Currency:
+    if isinstance(value, Currency):
+        return value
+    return Currency(value)

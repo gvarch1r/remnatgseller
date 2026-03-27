@@ -1,6 +1,6 @@
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from uuid import UUID
 
 from loguru import logger
@@ -53,7 +53,15 @@ from src.application.use_cases.subscription.commands.purchase import (
     PurchaseSubscription,
     PurchaseSubscriptionDto,
 )
-from src.core.enums import Currency, PaymentGatewayType, PurchaseType, TransactionStatus
+from src.core.enums import (
+    Currency,
+    PaymentGatewayType,
+    PurchaseType,
+    TransactionStatus,
+    ensure_currency,
+    ensure_payment_gateway_type,
+    ensure_purchase_type,
+)
 from src.core.utils.i18n_helpers import (
     i18n_format_days,
     i18n_format_device_limit,
@@ -132,17 +140,20 @@ class CreatePayment(Interactor[CreatePaymentDto, PaymentResultDto]):
         self.translator_hub = translator_hub
 
     async def _execute(self, actor: UserDto, data: CreatePaymentDto) -> PaymentResultDto:
+        gateway_type = ensure_payment_gateway_type(data.gateway_type)
+        purchase_type = ensure_purchase_type(data.purchase_type)
+
         flow_id = str(uuid.uuid4())
         pay_log = logger.bind(
             payment_flow_id=flow_id,
             user_telegram_id=actor.telegram_id,
-            gateway_type=data.gateway_type.value,
-            purchase_type=data.purchase_type.value,
+            gateway_type=gateway_type.value,
+            purchase_type=purchase_type.value,
         )
-        gateway_instance = await self.get_payment_gateway_instance.system(data.gateway_type)
+        gateway_instance = await self.get_payment_gateway_instance.system(gateway_type)
         i18n = self.translator_hub.get_translator_by_locale(actor.language)
 
-        if data.purchase_type == PurchaseType.ADD_DEVICES:
+        if purchase_type == PurchaseType.ADD_DEVICES:
             details = i18n.get(
                 "payment-invoice-add-devices",
                 name=data.plan_snapshot.name,
@@ -152,19 +163,22 @@ class CreatePayment(Interactor[CreatePaymentDto, PaymentResultDto]):
             key, kw = i18n_format_days(data.plan_snapshot.duration)
             details = i18n.get(
                 "payment-invoice-description",
-                purchase_type=data.purchase_type,
+                purchase_type=purchase_type,
                 name=data.plan_snapshot.name,
                 duration=i18n.get(key, **kw),
             )
+
+        gw_currency = ensure_currency(gateway_instance.data.currency)
+        gateway_instance.data = replace(gateway_instance.data, currency=gw_currency)
 
         transaction = TransactionDto(
             payment_id=uuid.uuid4(),
             user_telegram_id=actor.telegram_id,
             status=TransactionStatus.PENDING,
-            purchase_type=data.purchase_type,
+            purchase_type=purchase_type,
             gateway_type=gateway_instance.data.type,
             pricing=data.pricing,
-            currency=gateway_instance.data.currency,
+            currency=gw_currency,
             plan_snapshot=data.plan_snapshot,
         )
 
@@ -195,7 +209,7 @@ class CreatePayment(Interactor[CreatePaymentDto, PaymentResultDto]):
             "create_payment success payment_id={} elapsed_ms={:.1f} currency={}",
             str(payment.id),
             elapsed_ms,
-            gateway_instance.data.currency.value,
+            gw_currency.value,
         )
         return payment
 
