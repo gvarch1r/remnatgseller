@@ -5,7 +5,7 @@
     <a href="https://github.com/gvarch1r/remnatgseller/blob/main/README.ru_RU.md"><b>РУССКИЙ</b></a>
 </p>
 
-![remnashop]()
+![remnatgseller]()
 
 **This project is a Telegram bot for selling VPN subscriptions, integrated with Remnawave.**
 
