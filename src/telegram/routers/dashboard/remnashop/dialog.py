@@ -10,6 +10,7 @@ from src.telegram.routers.extra.test import show_dev_popup
 from src.telegram.states import (
     Dashboard,
     DashboardRemnashop,
+    RemnashopDeviceAddons,
     RemnashopGateways,
     RemnashopMenuEditor,
     RemnashopNotifications,
@@ -63,6 +64,13 @@ remnashop = Window(
             state=RemnashopPlans.MAIN,
             mode=StartMode.RESET_STACK,
             when=require_permission(Permission.VIEW_PLANS),
+        ),
+        Start(
+            text=I18nFormat("btn-remnashop.device-addons"),
+            id="device_addons",
+            state=RemnashopDeviceAddons.MAIN,
+            mode=StartMode.RESET_STACK,
+            when=require_permission(Permission.REMNASHOP_PLAN_EDITOR),
         ),
         Start(
             text=I18nFormat("btn-remnashop.notifications"),

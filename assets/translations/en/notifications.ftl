@@ -2,6 +2,8 @@ ntf-common =
     .rate-limited = ⚠️ <i>Too many attempts. Please wait a few seconds.</i>
 
 ntf-subscription =
+    .add-devices-not-applicable = ❌ <i>Adding devices is only available for an active paid subscription with a device limit (not during trial).</i>
+
     .plans-unavailable = ❌ <i>No subscription plans are available right now.</i>
     .gateways-unavailable = ❌ <i>No payment methods are available right now.</i>
     .addons-unavailable = ❌ <i>No device add-on packages are available.</i>

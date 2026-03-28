@@ -48,3 +48,20 @@ class DeviceAddonDaoImpl(DeviceAddonDao):
         result = await self.session.scalars(stmt)
         rows = list(result.all())
         return [self._to_dto(r) for r in rows]
+
+    async def list_all(self) -> list[DeviceAddonDto]:
+        stmt = (
+            select(DeviceAddon)
+            .options(selectinload(DeviceAddon.prices))
+            .order_by(DeviceAddon.order_index.asc())
+        )
+        result = await self.session.scalars(stmt)
+        rows = list(result.all())
+        return [self._to_dto(r) for r in rows]
+
+    async def toggle_active(self, addon_id: int) -> bool:
+        row = await self.session.get(DeviceAddon, addon_id)
+        if row is None:
+            raise ValueError(f"Device addon '{addon_id}' not found")
+        row.is_active = not row.is_active
+        return row.is_active

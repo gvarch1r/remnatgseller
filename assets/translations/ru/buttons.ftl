@@ -239,6 +239,7 @@ btn-remnashop =
     .referral = 👥 Реф. система
     .advertising = 🎯 Реклама
     .plans = 📦 Планы
+    .device-addons = 📱 Докупка устройств
     .notifications = 🔔 Уведомления
     .logs = 📄 Логи
     .menu-editor = 🎛 Доп. кнопки
@@ -260,6 +261,13 @@ btn-menu-editor =
         *[0] 🔴 Выключена
     }
     
+btn-device-addon =
+    .row = +{ $device_count } устр. · { $summary }
+    .active = { $is_active ->
+    [1] 🟢 Вкл
+    *[0] 🔴 Выкл
+    }
+
 btn-gateway =
     .title = { gateway-type }
     .setting = { $field }

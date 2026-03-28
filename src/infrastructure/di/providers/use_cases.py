@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide_all
 
 from src.application.use_cases.access import ACCESS_USE_CASES
 from src.application.use_cases.broadcast import BROADCAST_USE_CASES
+from src.application.use_cases.device_addon import DEVICE_ADDON_USE_CASES
 from src.application.use_cases.gateways import GATEWAYS_USE_CASES
 from src.application.use_cases.importer import IMPORTER_USE_CASES
 from src.application.use_cases.misc import MISC_USE_CASES
@@ -20,6 +21,7 @@ class UseCasesProvider(Provider):
     use_cases = provide_all(
         *ACCESS_USE_CASES,
         *BROADCAST_USE_CASES,
+        *DEVICE_ADDON_USE_CASES,
         *GATEWAYS_USE_CASES,
         *IMPORTER_USE_CASES,
         *MISC_USE_CASES,

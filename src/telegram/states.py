@@ -141,6 +141,10 @@ class RemnashopNotifications(StatesGroup):
     SYSTEM = State()
 
 
+class RemnashopDeviceAddons(StatesGroup):
+    MAIN = State()
+
+
 class RemnashopPlans(StatesGroup):
     MAIN = State()
     IMPORT = State()

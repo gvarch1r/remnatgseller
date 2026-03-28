@@ -34,6 +34,7 @@ class DaoProvider(Provider):
     scope = Scope.REQUEST
 
     broadcast = provide(source=BroadcastDaoImpl, provides=BroadcastDao)
+    device_addon = provide(source=DeviceAddonDaoImpl, provides=DeviceAddonDao)
     payment_gateway = provide(source=PaymentGatewayDaoImpl, provides=PaymentGatewayDao)
     plan = provide(source=PlanDaoImpl, provides=PlanDao)
     promocode = provide(source=PromocodeDaoImpl, provides=PromocodeDao)

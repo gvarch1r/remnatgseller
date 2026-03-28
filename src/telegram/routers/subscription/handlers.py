@@ -210,22 +210,40 @@ async def on_add_devices_click(
     callback: CallbackQuery,
     widget: Button,
     dialog_manager: DialogManager,
+    subscription_dao: FromDishka[SubscriptionDao],
     device_addon_dao: FromDishka[DeviceAddonDao],
     payment_gateway_dao: FromDishka[PaymentGatewayDao],
     notifier: FromDishka[Notifier],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    current = await subscription_dao.get_current(user.telegram_id)
+    if (
+        not current
+        or current.is_trial
+        or not current.has_devices_limit
+    ):
+        logger.info(
+            f"{user.log} Add devices blocked: sub={current is not None} "
+            f"trial={getattr(current, 'is_trial', None)} "
+            f"has_dev_limit={getattr(current, 'has_devices_limit', None)}"
+        )
+        await notifier.notify_user(user, i18n_key="ntf-subscription.add-devices-not-applicable")
+        await callback.answer()
+        return
+
     addons = await device_addon_dao.get_active()
     gateways = await payment_gateway_dao.get_active()
 
     if not addons:
         logger.warning(f"{user.log} No device addons available")
         await notifier.notify_user(user, i18n_key="ntf-subscription.addons-unavailable")
+        await callback.answer()
         return
 
     if not gateways:
         logger.warning(f"{user.log} No active payment gateways")
         await notifier.notify_user(user, i18n_key="ntf-subscription.gateways-unavailable")
+        await callback.answer()
         return
 
     dialog_manager.dialog_data["purchase_type"] = PurchaseType.ADD_DEVICES
