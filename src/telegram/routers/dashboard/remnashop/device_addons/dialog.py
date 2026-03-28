@@ -1,4 +1,4 @@
-from aiogram_dialog import Dialog, StartMode, Window
+from aiogram_dialog import Dialog, Window
 from aiogram_dialog.widgets.kbd import Button, ListGroup, Row, ScrollingGroup, SwitchTo
 from magic_filter import F
 
@@ -50,7 +50,6 @@ main = Window(
             text=I18nFormat("btn-back.general"),
             id="back_remnashop",
             state=DashboardRemnashop.MAIN,
-            mode=StartMode.RESET_STACK,
         ),
         *main_menu_button,
     ),
