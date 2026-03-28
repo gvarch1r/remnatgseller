@@ -1,6 +1,10 @@
 ntf-common =
     .rate-limited = ⚠️ <i>Too many attempts. Please wait a few seconds.</i>
 
+ntf-device-addon =
+    .prices-invalid = ❌ <i>Invalid format. One line per currency, e.g. <code>RUB 199</code>, <code>XTR 50</code>, <code>USD 2</code>.</i>
+    .created = ✅ <i>Device add-on package created.</i>
+
 ntf-subscription =
     .add-devices-not-applicable = ❌ <i>Adding devices is only available for an active paid subscription with a device limit (not during trial).</i>
 

@@ -143,6 +143,8 @@ class RemnashopNotifications(StatesGroup):
 
 class RemnashopDeviceAddons(StatesGroup):
     MAIN = State()
+    ADD_DEVICE_COUNT = State()
+    ADD_PRICES = State()
 
 
 class RemnashopPlans(StatesGroup):

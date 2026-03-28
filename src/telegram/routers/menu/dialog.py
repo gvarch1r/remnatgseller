@@ -149,6 +149,7 @@ devices = Window(
             id="buy_more_devices",
             on_click=on_buy_more_devices,
             when=F["show_buy_more_devices"],
+            style=Style(ButtonStyle.SUCCESS),
         ),
     ),
     Row(

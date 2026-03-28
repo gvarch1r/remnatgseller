@@ -1,7 +1,7 @@
 from .base import BaseDto, TimestampMixin, TrackableMixin
 from .broadcast import BroadcastDto, BroadcastMessageDto
 from .build import BuildInfoDto
-from .device_addon import DeviceAddonDto, DeviceAddonPriceDto
+from .device_addon import CreateDeviceAddonDto, DeviceAddonDto, DeviceAddonPriceDto
 from .message_payload import MediaDescriptorDto, MessagePayloadDto
 from .notification_task import NotificationTaskDto
 from .payment_gateway import (
@@ -62,6 +62,7 @@ __all__ = [
     "PlanDurationDto",
     "PlanPriceDto",
     "PlanSnapshotDto",
+    "CreateDeviceAddonDto",
     "DeviceAddonDto",
     "DeviceAddonPriceDto",
     "PromocodeDto",

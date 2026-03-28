@@ -30,3 +30,12 @@ async def device_addons_admin_getter(
         for a in addons
     ]
     return {"device_addons": items, "addons_empty": len(items) == 0}
+
+
+async def device_addon_add_prices_getter(
+    dialog_manager: DialogManager,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    del kwargs
+    n = dialog_manager.dialog_data.get("addon_device_count")
+    return {"addon_device_count": n if isinstance(n, int) else 0}

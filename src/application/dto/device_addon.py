@@ -7,6 +7,12 @@ from src.core.enums import Currency
 from .base import BaseDto, TrackableMixin
 
 
+@dataclass(frozen=True)
+class CreateDeviceAddonDto:
+    device_count: int
+    prices: dict[Currency, Decimal]
+
+
 @dataclass(kw_only=True)
 class DeviceAddonPriceDto(BaseDto, TrackableMixin):
     device_addon_id: int

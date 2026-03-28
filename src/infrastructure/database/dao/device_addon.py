@@ -1,10 +1,13 @@
-from sqlalchemy import select
+from decimal import Decimal
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.application.common.dao import DeviceAddonDao
 from src.application.dto import DeviceAddonDto, DeviceAddonPriceDto
-from src.infrastructure.database.models import DeviceAddon
+from src.core.enums import Currency
+from src.infrastructure.database.models import DeviceAddon, DeviceAddonPrice
 
 
 class DeviceAddonDaoImpl(DeviceAddonDao):
@@ -65,3 +68,37 @@ class DeviceAddonDaoImpl(DeviceAddonDao):
             raise ValueError(f"Device addon '{addon_id}' not found")
         row.is_active = not row.is_active
         return row.is_active
+
+    async def create(
+        self,
+        device_count: int,
+        prices: dict[Currency, Decimal],
+    ) -> DeviceAddonDto:
+        max_order = await self.session.scalar(
+            select(func.coalesce(func.max(DeviceAddon.order_index), 0)),
+        )
+        order_index = int(max_order or 0) + 1
+        addon = DeviceAddon(
+            device_count=device_count,
+            order_index=order_index,
+            is_active=True,
+        )
+        self.session.add(addon)
+        await self.session.flush()
+        for currency, price in prices.items():
+            self.session.add(
+                DeviceAddonPrice(
+                    device_addon_id=addon.id,
+                    currency=currency,
+                    price=price,
+                ),
+            )
+        await self.session.flush()
+        stmt = (
+            select(DeviceAddon)
+            .where(DeviceAddon.id == addon.id)
+            .options(selectinload(DeviceAddon.prices))
+        )
+        row = await self.session.scalar(stmt)
+        assert row is not None
+        return self._to_dto(row)

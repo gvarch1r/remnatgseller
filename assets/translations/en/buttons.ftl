@@ -19,6 +19,9 @@ btn-subscription =
 btn-devices =
     .buy-more = 🛒 Buy more device slots
 
+btn-device-addon =
+    .add = ➕ Add package
+
 btn-user =
     .quick-plus-7 = ⏩ +7 days
     .quick-plus-30 = ⏩ +30 days
