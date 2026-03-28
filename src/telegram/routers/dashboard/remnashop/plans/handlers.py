@@ -212,6 +212,28 @@ async def on_plan_move(
 
 
 @inject
+async def on_plan_delete_from_list(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    notifier: FromDishka[Notifier],
+    delete_plan: FromDishka[DeletePlan],
+) -> None:
+    del widget
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    plan_id = int(dialog_manager.item_id)  # type: ignore[attr-defined]
+
+    if is_double_click(dialog_manager, key=f"delete_list_{plan_id}", cooldown=10):
+        await delete_plan(user, plan_id)
+        await notifier.notify_user(user, i18n_key="ntf-plan.deleted")
+        await dialog_manager.show()
+        return
+
+    await notifier.notify_user(user, i18n_key="ntf-common.double-click-confirm")
+    logger.debug(f"{user.log} Delete plan from list id={plan_id} (awaiting confirmation)")
+
+
+@inject
 async def on_plan_delete(
     callback: CallbackQuery,
     widget: Button,

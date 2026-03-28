@@ -22,6 +22,9 @@ btn-devices =
 btn-device-addon =
     .add = ➕ Add package
 
+btn-plans =
+    .delete-list = 🗑
+
 btn-user =
     .quick-plus-7 = ⏩ +7 days
     .quick-plus-30 = ⏩ +30 days

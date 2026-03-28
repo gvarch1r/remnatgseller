@@ -371,6 +371,7 @@ btn-plans =
     .save = ✅ Сохранить
     .create = ✅ Создать план
     .delete = ❌ Удалить
+    .delete-list = 🗑
     .name = 🏷️ Название
     .description = 💬 Описание
     .description-remove = ❌ Удалить текущее описание
