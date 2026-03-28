@@ -20,6 +20,7 @@ btn-common =
     }
 
 btn-devices =
+    .buy-more = 🛒 Докупить устройства
     .delete-all = 🗑 Удалить все устройства
     .reissue = 🔄 Перевыпустить подписку
     .confirm-delete = ✅ Да, удалить

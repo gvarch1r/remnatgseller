@@ -152,6 +152,9 @@ async def devices_getter(
         "devices": formatted_devices,
         "devices_empty": len(devices) == 0,
         "has_devices": len(devices) > 0,
+        "show_buy_more_devices": (
+            not current_subscription.is_trial and current_subscription.has_devices_limit
+        ),
     }
 
 

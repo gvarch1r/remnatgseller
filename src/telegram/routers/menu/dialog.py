@@ -33,6 +33,7 @@ from .getters import (
     menu_getter,
 )
 from .handlers import (
+    on_buy_more_devices,
     on_device_delete_all_confirm,
     on_device_delete_confirm,
     on_device_delete_request,
@@ -141,6 +142,14 @@ devices = Window(
         item_id_getter=lambda item: item["short_hwid"],
         items="devices",
         when=F["has_devices"],
+    ),
+    Row(
+        Button(
+            text=I18nFormat("btn-devices.buy-more"),
+            id="buy_more_devices",
+            on_click=on_buy_more_devices,
+            when=F["show_buy_more_devices"],
+        ),
     ),
     Row(
         Start(

@@ -8,7 +8,7 @@ from dishka.integrations.aiogram_dialog import inject
 from loguru import logger
 
 from src.application.common import Notifier, TranslatorRunner
-from src.application.common.dao import SettingsDao, SubscriptionDao
+from src.application.common.dao import DeviceAddonDao, PaymentGatewayDao, SettingsDao, SubscriptionDao
 from src.application.dto import MediaDescriptorDto, MessagePayloadDto, PlanSnapshotDto, UserDto
 from src.application.services import BotService
 from src.application.use_cases.referral.queries.code import GenerateReferralQr
@@ -24,11 +24,11 @@ from src.application.use_cases.subscription.commands.purchase import (
 )
 from src.application.use_cases.user.queries.plans import GetAvailableTrial
 from src.core.constants import USER_KEY
-from src.core.enums import MediaType
+from src.core.enums import MediaType, PurchaseType
 from src.core.utils.i18n_helpers import i18n_format_expire_time
 from src.core.utils.time import get_traffic_reset_delta
 from src.telegram.keyboards import CALLBACK_CHANNEL_CONFIRM, CALLBACK_RULES_ACCEPT
-from src.telegram.states import MainMenu
+from src.telegram.states import MainMenu, Subscription
 
 router = Router(name=__name__)
 
@@ -83,6 +83,42 @@ async def on_get_trial(
 
     trial = PlanSnapshotDto.from_plan(plan, plan.durations[0].days)
     await activate_trial_subscription.system(ActivateTrialSubscriptionDto(user, trial))
+
+
+@inject
+async def on_buy_more_devices(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    subscription_dao: FromDishka[SubscriptionDao],
+    device_addon_dao: FromDishka[DeviceAddonDao],
+    payment_gateway_dao: FromDishka[PaymentGatewayDao],
+    notifier: FromDishka[Notifier],
+) -> None:
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    current = await subscription_dao.get_current(user.telegram_id)
+    if not current or current.is_trial or not current.has_devices_limit:
+        await notifier.notify_user(user, i18n_key="ntf-subscription.add-devices-not-applicable")
+        await callback.answer()
+        return
+
+    addons = await device_addon_dao.get_active()
+    gateways = await payment_gateway_dao.get_active()
+    if not addons:
+        await notifier.notify_user(user, i18n_key="ntf-subscription.addons-unavailable")
+        await callback.answer()
+        return
+    if not gateways:
+        await notifier.notify_user(user, i18n_key="ntf-subscription.gateways-unavailable")
+        await callback.answer()
+        return
+
+    await dialog_manager.start(
+        state=Subscription.ADD_DEVICES_ADDON,
+        mode=StartMode.RESET_STACK,
+        show_mode=ShowMode.DELETE_AND_SEND,
+        data={"purchase_type": PurchaseType.ADD_DEVICES.value},
+    )
 
 
 @inject
