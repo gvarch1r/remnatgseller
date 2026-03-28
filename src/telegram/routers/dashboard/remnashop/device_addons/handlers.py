@@ -11,7 +11,9 @@ from loguru import logger
 from src.application.common import Notifier
 from src.application.dto import CreateDeviceAddonDto, UserDto
 from src.application.use_cases.device_addon.commands.create import CreateDeviceAddon
+from src.application.use_cases.device_addon.commands.delete import DeleteDeviceAddon
 from src.application.use_cases.device_addon.commands.manage import ToggleDeviceAddonActive
+from src.telegram.utils import is_double_click
 from src.core.constants import USER_KEY
 from src.core.enums import Currency
 from src.telegram.states import RemnashopDeviceAddons
@@ -24,6 +26,33 @@ async def on_device_addon_row_click(
 ) -> None:
     del button, dialog_manager
     await callback.answer()
+
+
+@inject
+async def on_device_addon_delete_from_list(
+    callback: CallbackQuery,
+    widget: Button,
+    dialog_manager: DialogManager,
+    notifier: FromDishka[Notifier],
+    delete_device_addon: FromDishka[DeleteDeviceAddon],
+) -> None:
+    del widget
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    addon_id = int(dialog_manager.item_id)  # type: ignore[attr-defined]
+
+    if is_double_click(dialog_manager, key=f"delete_device_addon_{addon_id}", cooldown=10):
+        try:
+            await delete_device_addon(user, addon_id)
+        except ValueError:
+            await notifier.notify_user(user, i18n_key="ntf-error.unknown")
+            await dialog_manager.show()
+            return
+        await notifier.notify_user(user, i18n_key="ntf-device-addon.deleted")
+        await dialog_manager.show()
+        return
+
+    await notifier.notify_user(user, i18n_key="ntf-common.double-click-confirm")
+    logger.debug(f"{user.log} Delete device addon id={addon_id} (awaiting confirmation)")
 
 
 async def on_cancel_device_addon_add(

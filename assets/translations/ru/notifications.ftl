@@ -91,6 +91,7 @@ ntf-access =
 ntf-device-addon =
     .prices-invalid = ❌ <i>Неверный формат. Укажите по строке на валюту: <code>RUB 199</code>, <code>XTR 50</code>, <code>USD 2</code>.</i>
     .created = ✅ <i>Пакет докупки устройств добавлен.</i>
+    .deleted = ✅ <i>Пакет докупки устройств удалён.</i>
 
 ntf-plan =
     .not-file = ⚠️ <i>Отправьте планы в виде json файла.</i>

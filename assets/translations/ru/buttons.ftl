@@ -264,6 +264,7 @@ btn-menu-editor =
     
 btn-device-addon =
     .add = ➕ Добавить пакет
+    .delete-list = 🗑
     .row = +{ $device_count } устр. · { $summary }
     .active = { $is_active ->
     [1] 🟢 Вкл

@@ -21,6 +21,7 @@ btn-devices =
 
 btn-device-addon =
     .add = ➕ Add package
+    .delete-list = 🗑
 
 btn-plans =
     .delete-list = 🗑

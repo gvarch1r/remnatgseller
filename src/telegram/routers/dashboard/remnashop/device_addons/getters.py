@@ -29,7 +29,9 @@ async def device_addons_admin_getter(
         }
         for a in addons
     ]
-    return {"device_addons": items, "addons_empty": len(items) == 0}
+    empty = len(items) == 0
+    # Fluent variants: [1] empty, [0] has rows (int avoids duplicate when/body bugs)
+    return {"device_addons": items, "addons_empty": 1 if empty else 0}
 
 
 async def device_addon_add_prices_getter(

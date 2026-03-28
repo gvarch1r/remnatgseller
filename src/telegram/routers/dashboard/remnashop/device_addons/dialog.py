@@ -15,14 +15,14 @@ from .handlers import (
     on_cancel_device_addon_add,
     on_device_addon_active_toggle,
     on_device_addon_count_input,
+    on_device_addon_delete_from_list,
     on_device_addon_prices_input,
     on_device_addon_row_click,
 )
 
 main = Window(
     Banner(BannerName.DASHBOARD),
-    I18nFormat("msg-device-addons-main", when=~F["addons_empty"]),
-    I18nFormat("msg-device-addons-empty", when=F["addons_empty"]),
+    I18nFormat("msg-device-addons-admin"),
     Row(
         SwitchTo(
             text=I18nFormat("btn-device-addon.add"),
@@ -50,6 +50,12 @@ main = Window(
                     ),
                     id="toggle_active",
                     on_click=on_device_addon_active_toggle,
+                ),
+                Button(
+                    text=I18nFormat("btn-device-addon.delete-list"),
+                    id="delete_addon",
+                    on_click=on_device_addon_delete_from_list,
+                    style=Style(ButtonStyle.DANGER),
                 ),
             ),
             id="device_addons_list",

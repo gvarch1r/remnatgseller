@@ -102,3 +102,17 @@ class DeviceAddonDaoImpl(DeviceAddonDao):
         row = await self.session.scalar(stmt)
         assert row is not None
         return self._to_dto(row)
+
+    async def delete(self, addon_id: int) -> bool:
+        row = await self.session.get(DeviceAddon, addon_id)
+        if row is None:
+            return False
+        await self.session.delete(row)
+        await self.session.flush()
+        stmt = select(DeviceAddon).order_by(DeviceAddon.order_index.asc())
+        result = await self.session.scalars(stmt)
+        remaining = list(result.all())
+        for i, r in enumerate(remaining, start=1):
+            if r.order_index != i:
+                r.order_index = i
+        return True
