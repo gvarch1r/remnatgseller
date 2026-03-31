@@ -10,7 +10,7 @@ dependencies = [
     "greenlet>=3.2.4",
     "uvicorn>=0.38.0",
     "fastapi>=0.120.2",
-    "remnapy==2.6.3",
+    "supn-remnawave-panel",
     #
     "dishka~=1.7.2",
     "adaptix==3.0.0b11",
@@ -33,7 +33,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-remnapy = { git = "https://github.com/snoups/remnapy", rev = "bec1c72" }
+# SDK: https://github.com/gvarch1r/remnapi
+supn-remnawave-panel = { git = "https://github.com/gvarch1r/remnapi.git", rev = "main" }
 
 [project.urls]
 homepage = "https://github.com/gvarch1r/remnatgseller"
@@ -92,7 +93,7 @@ extra_checks = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
-module = ["fluentogram.*", "remnawave.*", "qrcode.*", "remnapy.*"]
+module = ["fluentogram.*", "remnawave.*", "qrcode.*", "supn_remnawave_panel.*"]
 follow_untyped_imports = true
 
 [[tool.mypy.overrides]]

@@ -5,8 +5,7 @@ from adaptix import Retort
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
-from remnapy import RemnawaveSDK
-from remnapy.enums.users import TrafficLimitStrategy
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK, TrafficLimitStrategy
 
 from src.application.common import TranslatorRunner
 from src.application.common.dao import PlanDao

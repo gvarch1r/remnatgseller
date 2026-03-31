@@ -1,11 +1,13 @@
-from typing import cast
-
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from loguru import logger
-from remnapy.controllers import WebhookUtility
-from remnapy.models.webhook import NodeDto, UserDto, UserHwidDeviceEventDto
+from supn_remnawave_panel.remnapy_compat.controllers import WebhookUtility
+from supn_remnawave_panel.remnapy_compat.webhook_models import (
+    NodeDto,
+    UserDto,
+    UserHwidDeviceEventDto,
+)
 
 from src.application.common import EventPublisher
 from src.application.events import ErrorEvent
@@ -44,11 +46,11 @@ async def remnawave_webhook(
 
     try:
         if WebhookUtility.is_user_event(payload.event):
-            user = cast(UserDto, WebhookUtility.get_typed_data(payload))
+            user = UserDto.model_validate(WebhookUtility.get_typed_data(payload))
             await remna_webhook_service.handle_user_event(payload.event, user)
 
         elif WebhookUtility.is_user_hwid_devices_event(payload.event):
-            event = cast(UserHwidDeviceEventDto, WebhookUtility.get_typed_data(payload))
+            event = UserHwidDeviceEventDto.from_payload_data(WebhookUtility.get_typed_data(payload))
             await remna_webhook_service.handle_device_event(
                 payload.event,
                 event.user,
@@ -56,7 +58,7 @@ async def remnawave_webhook(
             )
 
         elif WebhookUtility.is_node_event(payload.event):
-            node = cast(NodeDto, WebhookUtility.get_typed_data(payload))
+            node = NodeDto.model_validate(WebhookUtility.get_typed_data(payload))
             await remna_webhook_service.handle_node_event(payload.event, node)
 
         else:

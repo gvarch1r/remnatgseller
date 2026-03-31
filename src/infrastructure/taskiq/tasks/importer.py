@@ -4,9 +4,9 @@ from adaptix import Retort
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
 from redis.asyncio import Redis
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import BadRequestError
-from remnapy.models import CreateUserRequestDto, UserResponseDto
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat.exceptions import BadRequestError
+from supn_remnawave_panel.remnapy_compat.models import CreateUserRequestDto, UserResponseDto
 
 from src.application.common.dao import SubscriptionDao, UserDao
 from src.application.dto.user import UserDto

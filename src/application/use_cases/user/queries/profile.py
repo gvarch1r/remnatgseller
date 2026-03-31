@@ -3,9 +3,8 @@ from typing import Any, Optional
 from uuid import UUID
 
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.models import GetExternalSquadByUuidResponseDto
-from remnapy.models.hwid import HwidDeviceDto
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat.models import GetExternalSquadByUuidResponseDto, HwidDeviceDto
 
 from src.application.common import Interactor, Remnawave
 from src.application.common.dao import SettingsDao, SubscriptionDao, UserDao

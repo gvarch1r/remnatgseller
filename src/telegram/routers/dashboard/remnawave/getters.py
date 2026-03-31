@@ -4,7 +4,7 @@ from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.common import ManagedScroll
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
-from remnapy import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
 
 from src.application.common import TranslatorRunner
 from src.core.utils.converters import country_code_to_flag, percent

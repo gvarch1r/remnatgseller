@@ -3,7 +3,7 @@ from typing import Any
 from aiogram_dialog import DialogManager
 from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
-from remnapy import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
 
 from src.core.utils.squads import resolve_squad_uuid
 

@@ -4,16 +4,21 @@ from uuid import UUID
 
 from loguru import logger
 from pydantic import ValidationError
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import AuthenticationError, ConflictError, NetworkError, NotFoundError
-from remnapy.models import (
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat.exceptions import (
+    AuthenticationError,
+    ConflictError,
+    NetworkError,
+    NotFoundError,
+)
+from supn_remnawave_panel.remnapy_compat.models import (
     CreateUserRequestDto,
     DeleteUserHwidDeviceRequestDto,
     GetStatsResponseDto,
+    HwidDeviceDto,
     UpdateUserRequestDto,
     UserResponseDto,
 )
-from remnapy.models.hwid import HwidDeviceDto
 
 from src.application.common import Remnawave
 from src.application.common.remnawave import T
@@ -73,7 +78,8 @@ class RemnawaveImpl(Remnawave):
             logger.error(f"Failed to connect to Remnawave panel: '{e}'")
             raise
 
-        if not isinstance(response, GetStatsResponseDto):
+        raw_stats = getattr(response, "_raw", response)
+        if not isinstance(raw_stats, GetStatsResponseDto):
             logger.error(f"Invalid response from Remnawave panel: '{response}'")
             raise ValueError(f"Invalid response from Remnawave panel: {response}")
 

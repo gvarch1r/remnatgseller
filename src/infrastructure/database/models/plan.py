@@ -2,11 +2,10 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from remnapy.enums.users import TrafficLimitStrategy
 from sqlalchemy import ARRAY, BigInteger, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.enums import Currency, PlanAvailability, PlanType
+from src.core.enums import Currency, PlanAvailability, PlanType, TrafficLimitStrategy
 
 from .base import BaseSql
 from .timestamp import TimestampMixin

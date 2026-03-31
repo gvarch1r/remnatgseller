@@ -7,8 +7,8 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 from pydantic import PlainValidator
-from remnapy.models import UserResponseDto
-from remnapy.models.webhook import UserDto as UserWebhookDto
+from supn_remnawave_panel.remnapy_compat.models import UserResponseDto
+from supn_remnawave_panel.remnapy_compat.webhook_models import UserDto as UserWebhookDto
 
 from src.core.enums import Locale, SystemNotificationType, UserNotificationType
 

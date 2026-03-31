@@ -1,6 +1,6 @@
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.exceptions import NotFoundError
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat.exceptions import NotFoundError
 
 from src.application.common import Interactor, Remnawave
 from src.application.common.dao import SubscriptionDao, UserDao

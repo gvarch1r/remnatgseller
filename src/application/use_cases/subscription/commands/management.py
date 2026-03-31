@@ -3,7 +3,7 @@ from datetime import timedelta
 from uuid import UUID
 
 from loguru import logger
-from remnapy import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
 
 from src.application.common import Interactor, Remnawave
 from src.application.common.dao import SubscriptionDao, UserDao

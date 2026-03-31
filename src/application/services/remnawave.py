@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import cast
 
 from loguru import logger
-from remnapy.models.webhook import HwidUserDeviceDto, NodeDto
+from supn_remnawave_panel.remnapy_compat.webhook_models import HwidUserDeviceDto, NodeDto
 
 from src.application.common import EventPublisher
 from src.application.common.dao import SubscriptionDao, UserDao

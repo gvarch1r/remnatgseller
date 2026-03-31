@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
-from remnapy.enums.users import TrafficLimitStrategy
+from supn_remnawave_panel.remnapy_compat import TrafficLimitStrategy
 
 from src.core.constants import TIMEZONE
 

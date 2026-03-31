@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-from remnapy.enums.users import TrafficLimitStrategy
+from supn_remnawave_panel.remnapy_compat import TrafficLimitStrategy
 
 from src.application.dto.message_payload import MessagePayloadDto
 from src.core.enums import MessageEffectId, ReferralRewardType, UserNotificationType

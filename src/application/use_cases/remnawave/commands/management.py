@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 from loguru import logger
-from remnapy import RemnawaveSDK
-from remnapy.models import DeleteUserAllHwidDeviceRequestDto
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat.models import DeleteUserAllHwidDeviceRequestDto
 
 from src.application.common import Interactor
 from src.application.common.dao import SubscriptionDao

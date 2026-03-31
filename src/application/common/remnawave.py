@@ -1,8 +1,7 @@
 from typing import List, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
-from remnapy.models import UserResponseDto
-from remnapy.models.hwid import HwidDeviceDto
+from supn_remnawave_panel.remnapy_compat.models import HwidDeviceDto, UserResponseDto
 
 from src.application.dto import PlanSnapshotDto, RemnaSubscriptionDto, SubscriptionDto, UserDto
 

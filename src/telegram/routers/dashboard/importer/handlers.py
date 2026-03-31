@@ -8,7 +8,7 @@ from dishka import FromDishka
 from dishka.integrations.aiogram_dialog import inject
 from loguru import logger
 from redis.asyncio import Redis
-from remnapy import RemnawaveSDK
+from supn_remnawave_panel.remnapy_compat import RemnawaveSDK
 
 from src.application.common import Notifier
 from src.application.dto import MessagePayloadDto, UserDto

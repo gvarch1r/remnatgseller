@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from remnapy.enums import TrafficLimitStrategy
+from supn_remnawave_panel.remnapy_compat import TrafficLimitStrategy
 
 from src.core.enums import PlanType, SubscriptionStatus
 from src.core.types import RemnaUserDto
