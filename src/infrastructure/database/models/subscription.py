@@ -5,7 +5,9 @@ from uuid import UUID
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.enums import SubscriptionStatus, TrafficLimitStrategy
+from supn_remnawave_panel.remnapy_compat import TrafficLimitStrategy
+
+from src.core.enums import SubscriptionStatus
 
 from .base import BaseSql
 from .timestamp import TimestampMixin
