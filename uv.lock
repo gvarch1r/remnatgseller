@@ -1157,7 +1157,7 @@ wheels = [
 [[package]]
 name = "supn-remnawave-panel"
 version = "2.7.4"
-source = { git = "https://github.com/gvarch1r/remnapi.git?rev=main#d397e469d01c4140053718a74102d996da23cbd7" }
+source = { git = "https://github.com/gvarch1r/remnapi.git?rev=main#c0a1e51f0673fdc4b7403035fd2701e258d5cd7c" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
