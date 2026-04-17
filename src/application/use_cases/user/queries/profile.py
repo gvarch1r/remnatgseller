@@ -117,7 +117,7 @@ class GetUserProfileSubscriptionResultDto:
     def formatted_external_squad(self) -> Optional[str]:
         if not self.external_squad:
             return None
-        return self.external_squad.name
+        return self.external_squad.response.name
 
 
 class GetUserProfileSubscription(Interactor[int, GetUserProfileSubscriptionResultDto]):
